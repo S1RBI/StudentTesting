@@ -12,6 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Controls.Primitives;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace StudentTesting.View.Pages
 {
@@ -20,14 +24,17 @@ namespace StudentTesting.View.Pages
     /// </summary>
     public partial class PageStart : Page
     {
+        private readonly ClassBaserowApiClient _baserowApiClient;
         public PageStart()
         {
             InitializeComponent();
+            _baserowApiClient = new ClassBaserowApiClient();
         }
-       
+
         private void btGo_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
     }
+    
 }

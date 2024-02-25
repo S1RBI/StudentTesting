@@ -24,7 +24,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Label Content="Имя: " VerticalAlignment="Center"/>
-            <TextBox Grid.Column="1" Padding="5" FontSize="16" VerticalAlignment="Center" Width="150">
+            <TextBox x:Name="tbName" Grid.Column="1" Padding="5" FontSize="16" VerticalAlignment="Center" Width="150">
                 <TextBox.Style>
                     <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
                         <Style.Resources>
