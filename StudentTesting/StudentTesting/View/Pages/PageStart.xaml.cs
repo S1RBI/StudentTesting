@@ -25,10 +25,12 @@ namespace StudentTesting.View.Pages
     public partial class PageStart : Page
     {
         private readonly ClassBaserowApiClient _baserowApiClient;
-        public PageStart()
+        private readonly ClassNet _emailSender;
+        internal PageStart()
         {
             InitializeComponent();
             _baserowApiClient = new ClassBaserowApiClient();
+            _emailSender = new ClassNet();
         }
 
         private void btGo_Click(object sender, RoutedEventArgs e)

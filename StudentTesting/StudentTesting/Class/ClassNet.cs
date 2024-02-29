@@ -3,18 +3,18 @@ using System.Configuration;
 using System.Net;
 using System.Net.Mail;
 
-public class ClassNet
+internal class ClassNet
 {
     private readonly string email;
     private readonly string password;
 
-    public ClassNet()
+    internal ClassNet()
     {
         email = ConfigurationManager.AppSettings["Email"];
         password = ConfigurationManager.AppSettings["Password"];
     }
 
-    public void SendEmail(string to, string subject, string content)
+    internal bool SendEmail(string to, string subject, string content)
     {
         MailAddress fromAddress = new MailAddress(email, "Cazarina Interiors");
         MailAddress toAddress = new MailAddress(to);
@@ -35,11 +35,11 @@ public class ClassNet
         try
         {
             smtpClient.Send(msg);
-            Console.WriteLine("Email sent successfully.");
+            return true; //Email sent successfully
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Error sending email: {ex.Message}");
+            return false; //Error sending email: {ex.Message}
         }
     }
 }

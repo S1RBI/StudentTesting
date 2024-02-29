@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-public class Record
+internal class Record
 {
     public int id { get; set; }
     public string order { get; set; }
@@ -8,10 +8,13 @@ public class Record
     public string surname { get; set; }
     public string name { get; set; }
     public string patronymic { get; set; }
+    public string group { get; set; }
 }
 
-public class RecordsResponse
+internal class RecordsResponse
 {
-    public int Count { get; set; }
+    public string count { get; set; }
+    public string next { get; set; }
+    public string previous { get; set; }
     public List<Record> Results { get; set; }
 }

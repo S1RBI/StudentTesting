@@ -7,128 +7,52 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-public class ClassBaserowApiClient
+internal class ClassBaserowApiClient
 {
     private readonly HttpClient _httpClient;
-
-    public ClassBaserowApiClient()
+    internal ClassBaserowApiClient()
     {
-        var baseUrl = ConfigurationManager.AppSettings["BaserowBaseUrl"];
-        var token = ConfigurationManager.AppSettings["BaserowToken"];
-
-        if (string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(token))
-            throw new InvalidOperationException("Baserow base URL or token is not configured properly.");
-
-        _httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
+        _httpClient = new HttpClient { BaseAddress = new Uri(ConfigurationManager.AppSettings["BaserowBaseUrl"]) };
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", ConfigurationManager.AppSettings["BaserowToken"]);
     }
 
-    // Метод для получения записей
-    public async Task<string> GetRecordsAsync(string tableId)
+    //Метод для получения записей
+    internal async Task<string> GetRecordsAsync(string tableId)
     {
         var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true");
-        response.EnsureSuccessStatusCode();
-
-        var content = await response.Content.ReadAsStringAsync();
-        return content; // Возвращаем JSON ответ как строку
+        return await response.Content.ReadAsStringAsync();
     }
 
     // Метод для обновления записи
-    public async Task<bool> UpdateRecordAsync(string tableId, string recordId, object updateObject)
+    internal async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
     {
-        try
+        var content = new StringContent(JsonConvert.SerializeObject(updateObject), System.Text.Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"database/rows/table/{tableId}/{idObject}/?user_field_names=true")
         {
-            var json = JsonConvert.SerializeObject(updateObject);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-            var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"database/rows/table/{tableId}/{recordId}/")
-            {
-                Content = content
-            };
-
-            var response = await _httpClient.SendAsync(request);
-            return response.IsSuccessStatusCode;
-        }
-        catch
-        {
-            return false;
-        }
+            Content = content
+        };
+        var response = await _httpClient.SendAsync(request);
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<Record> GetRecordByEmailAsync(string tableId, string email)
+    internal async Task<Record> GetRecordByEmailAsync(string tableId, string email)
     {
-        try
-        {
-            var uri = $"database/rows/table/{tableId}/?user_field_names=true";
-
-            // Отправляем GET-запрос
-            var response = await _httpClient.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
-
-            // Читаем ответ в строку
-            var content = await response.Content.ReadAsStringAsync();
-
-            // Десериализуем JSON в объект RecordsResponse
-            var recordsResponse = JsonConvert.DeserializeObject<RecordsResponse>(content);
-
-            // Ищем запись с нужным email
-            var record = recordsResponse.Results.FirstOrDefault(r => r.mail == email);
-
-            return record;
-        }
-        catch
-        {
-            return null;
-        }
+        return JsonConvert.DeserializeObject<RecordsResponse>(await GetRecordsAsync(tableId)).Results.FirstOrDefault(r => r.mail == email);
     }
 
-    public async Task<bool> UpdateRecordByEmailAsync(string tableId, string email, Record updatedRecord)
+    internal async Task<bool> UpdateRecordByEmailAsync(string tableId, string email, Record updatedRecord)
     {
-        try
-        {
-            // Находим запись по email
-            var existingRecord = await GetRecordByEmailAsync(tableId, email);
+        // Находим запись по email
+        var existingRecord = await GetRecordByEmailAsync(tableId, email);
+        if (existingRecord == null) return false; // Запись с таким email не найдена
 
-            if (existingRecord == null)
-            {
-                // Запись с таким email не найдена
-                return false;
-            }
+        // Обновляем данные в найденной записи
+        existingRecord.name = updatedRecord.name;
+        existingRecord.surname = updatedRecord.surname;
 
-            // Обновляем данные в найденной записи
-            existingRecord.name = updatedRecord.name;
-            existingRecord.surname = updatedRecord.surname;
-
-            // Сериализуем объект с обновленными данными в формат JSON
-            var json = JsonConvert.SerializeObject(existingRecord);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"database/rows/table/{tableId}/{existingRecord.id}/?user_field_names=true")
-            {
-                Content = content
-            };
-
-            var response = await _httpClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Успешно обновлено
-                return true;
-            }
-            else
-            {
-                // Выведем информацию об ошибке в консоль
-                Console.WriteLine($"Error updating record. StatusCode: {response.StatusCode}");
-                var errorContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Error content: {errorContent}");
-
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception during record update: {ex.Message}");
-            return false;
-        }
+        if (await UpdateRecordAsync(tableId, existingRecord, existingRecord.id))  
+            return true;
+        else
+            return false;     
     }
 }
