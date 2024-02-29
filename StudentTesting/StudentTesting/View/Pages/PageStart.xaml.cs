@@ -16,6 +16,7 @@ using System.Windows.Controls.Primitives;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using System.Configuration;
 
 namespace StudentTesting.View.Pages
 {
@@ -33,9 +34,23 @@ namespace StudentTesting.View.Pages
             _emailSender = new ClassNet();
         }
 
-        private void btGo_Click(object sender, RoutedEventArgs e)
+        private async void btGo_Click(object sender, RoutedEventArgs e)
         {
-            
+            try
+            {
+                var currentRecord = await _baserowApiClient.GetRecordByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
+
+                if (currentRecord == null)
+                {
+                    MessageBox.Show("Не верно введен email.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                NavigationService.Navigate(new PageMain(true));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
     

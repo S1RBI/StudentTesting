@@ -105,6 +105,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="View\Pages\PageMain.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Pages\PageStart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -120,6 +124,9 @@
     <Compile Include="Class\ClassBaserowApiClient.cs" />
     <Compile Include="Class\ClassNet.cs" />
     <Compile Include="Class\Record.cs" />
+    <Compile Include="View\Pages\PageMain.xaml.cs">
+      <DependentUpon>PageMain.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Pages\PageStart.xaml.cs">
       <DependentUpon>PageStart.xaml</DependentUpon>
     </Compile>

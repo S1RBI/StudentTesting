@@ -17,14 +17,14 @@ internal class ClassBaserowApiClient
     }
 
     //Метод для получения записей
-    internal async Task<string> GetRecordsAsync(string tableId)
+    private async Task<string> GetRecordsAsync(string tableId)
     {
         var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true");
         return await response.Content.ReadAsStringAsync();
     }
 
     // Метод для обновления записи
-    internal async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
+    private async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
     {
         var content = new StringContent(JsonConvert.SerializeObject(updateObject), System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"database/rows/table/{tableId}/{idObject}/?user_field_names=true")
@@ -40,6 +40,7 @@ internal class ClassBaserowApiClient
         return JsonConvert.DeserializeObject<RecordsResponse>(await GetRecordsAsync(tableId)).Results.FirstOrDefault(r => r.mail == email);
     }
 
+    //пример
     internal async Task<bool> UpdateRecordByEmailAsync(string tableId, string email, Record updatedRecord)
     {
         // Находим запись по email
