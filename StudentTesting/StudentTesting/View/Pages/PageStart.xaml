@@ -11,45 +11,46 @@
       Title="Тестирование студентов">
 
 
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Label Content="Имя: " VerticalAlignment="Center"/>
-            <TextBox x:Name="tbName" Grid.Column="1" Padding="5" FontSize="16" VerticalAlignment="Center" Width="150">
-                <TextBox.Style>
-                    <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                        <Style.Resources>
-                            <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                                <VisualBrush.Visual>
-                                    <Label Content="Введите имя" Foreground="LightGray" />
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </Style.Resources>
-                        <Style.Triggers>
-                            <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-                                <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                            </Trigger>
-                            <Trigger Property="Text" Value="{x:Null}">
-                                <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter Property="Background" Value="White" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Style>
-            </TextBox>
-        </Grid>
-
-        <Button x:Name="btGo" Click="btGo_Click" Grid.Row="2" Content="Готов" Width="100" Height="40" HorizontalAlignment="Center"/>
+    <Grid>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE1E4FF">
+            <StackPanel x:Name="stPanelCod" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Label Content="Код: " VerticalAlignment="Center"/>
+                <TextBox x:Name="tbCod1" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="0,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                <TextBox x:Name="tbCod2" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                <TextBox x:Name="tbCod3" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                <TextBox x:Name="tbCod4" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+            </StackPanel>
+            <StackPanel x:Name="stPanelMail" Orientation="Horizontal">
+            <Label Content="Почта: " VerticalAlignment="Center"/>
+        <TextBox x:Name="tbName" Padding="5" FontSize="16" VerticalAlignment="Center" Width="150">
+            <TextBox.Style>
+                <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                    <Style.Resources>
+                        <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                            <VisualBrush.Visual>
+                                <Label Content="Введите имя" Foreground="LightGray" />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Style.Resources>
+                    <Style.Triggers>
+                        <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                        </Trigger>
+                        <Trigger Property="Text" Value="{x:Null}">
+                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter Property="Background" Value="White" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button x:Name="btGo" Click="btGo_Click" Content="Готов" Width="100" Height="40" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>

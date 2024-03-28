@@ -11,6 +11,6 @@
       Title="Тестирование студентов">
 
     <Grid>
-        
+        <Button x:Name="btGo" Click="btGo_Click"  Content="Назад" Width="100" Height="40" HorizontalAlignment="Center"/>
     </Grid>
 </Page>

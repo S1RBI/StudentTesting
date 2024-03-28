@@ -24,5 +24,11 @@ namespace StudentTesting.View.Pages
         {
             InitializeComponent();
         }
+
+        private void btGo_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new PageStart());
+            //NavigationService.GoBack();
+        }
     }
 }

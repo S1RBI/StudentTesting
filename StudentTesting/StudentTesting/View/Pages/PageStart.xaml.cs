@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Configuration;
+using System.Text.RegularExpressions;
 
 namespace StudentTesting.View.Pages
 {
@@ -27,9 +28,12 @@ namespace StudentTesting.View.Pages
     {
         private readonly ClassBaserowApiClient _baserowApiClient;
         private readonly ClassNet _emailSender;
+        private string code;
         internal PageStart()
         {
+            
             InitializeComponent();
+            stPanelCod.Visibility = Visibility.Collapsed;
             _baserowApiClient = new ClassBaserowApiClient();
             _emailSender = new ClassNet();
         }
@@ -38,6 +42,14 @@ namespace StudentTesting.View.Pages
         {
             try
             {
+                if (stPanelMail.Visibility == Visibility.Collapsed)
+                {
+                    if (code == (tbCod1.Text+ tbCod2.Text + tbCod3.Text + tbCod4.Text))
+                    {
+                        NavigationService.Navigate(new PageMain(true));
+                    }
+                    return;
+                }
                 var currentRecord = await _baserowApiClient.GetRecordByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
 
                 if (currentRecord == null)
@@ -45,11 +57,39 @@ namespace StudentTesting.View.Pages
                     MessageBox.Show("Не верно введен email.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                NavigationService.Navigate(new PageMain(true));
+                else
+                {
+                    stPanelMail.Visibility = Visibility.Collapsed;
+                    stPanelCod.Visibility = Visibility.Visible;
+                    Random random = new Random();
+                    code = Convert.ToString(random.Next(1000, 10000));
+                    _emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: "+ code);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void tbCod_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.V && (e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                // Получить текст из буфера обмена
+                string clipboard = Clipboard.GetText();
+
+                if (Regex.IsMatch(clipboard, "^\\d+$"))
+                {
+                    tbCod1.Text = string.Empty;
+                    tbCod2.Text = string.Empty;
+                    tbCod3.Text = string.Empty;
+                    tbCod4.Text = string.Empty;
+                    tbCod1.Text = clipboard[0].ToString();
+                    tbCod2.Text = clipboard[1].ToString();
+                    tbCod3.Text = clipboard[2].ToString();
+                    tbCod4.Text = clipboard[3].ToString();
+                }
             }
         }
     }
