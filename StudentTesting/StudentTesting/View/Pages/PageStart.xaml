@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:StudentTesting.View.Pages"
       mc:Ignorable="d" 
       FontFamily="Tahoma"
-      Background="White"
+      Background="#FFE1E4FF"
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Тестирование студентов">
 
@@ -29,7 +29,7 @@
                     <Style.Resources>
                         <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Content="Введите имя" Foreground="LightGray" />
+                                <Label Content="Введите почту" Foreground="SlateGray" />
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </Style.Resources>
@@ -48,8 +48,14 @@
             </TextBox.Style>
         </TextBox>
             </StackPanel>
+            <StackPanel x:Name="stPanelError" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Label x:Name="lableError" Padding="3" Foreground="Red" Content="" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel x:Name="stLinkBack" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,0">
+                <TextBlock x:Name="tbLinkBack" Cursor="Hand" MouseLeftButtonUp="tbLinkBack_MouseLeftButtonUp"  TextDecorations="Underline" Foreground="Blue" >вернуться назад</TextBlock>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button x:Name="btGo" Click="btGo_Click" Content="Готов" Width="100" Height="40" HorizontalAlignment="Center"/>
+                <Button x:Name="btGo" Click="btGo_Click" Content="Отправить код" Width="100" Height="40" HorizontalAlignment="Center"/>
             </StackPanel>
         </StackPanel>
     </Grid>

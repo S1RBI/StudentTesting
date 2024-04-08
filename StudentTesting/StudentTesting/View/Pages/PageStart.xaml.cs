@@ -29,11 +29,14 @@ namespace StudentTesting.View.Pages
         private readonly ClassBaserowApiClient _baserowApiClient;
         private readonly ClassNet _emailSender;
         private string code;
+        private int id;
         internal PageStart()
         {
             
             InitializeComponent();
             stPanelCod.Visibility = Visibility.Collapsed;
+            stLinkBack.Visibility = Visibility.Collapsed;
+
             _baserowApiClient = new ClassBaserowApiClient();
             _emailSender = new ClassNet();
         }
@@ -46,24 +49,32 @@ namespace StudentTesting.View.Pages
                 {
                     if (code == (tbCod1.Text+ tbCod2.Text + tbCod3.Text + tbCod4.Text))
                     {
-                        NavigationService.Navigate(new PageMain(true));
+                        NavigationService.Navigate(new PageMain(id));
+                    }
+                    else
+                    {
+                        clearTextBox();
+                        lableError.Content = "Введен не верный код";
                     }
                     return;
                 }
                 var currentRecord = await _baserowApiClient.GetRecordByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
-
+                id = currentRecord.id;
                 if (currentRecord == null)
                 {
-                    MessageBox.Show("Не верно введен email.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    lableError.Content = "Введен не верный пароль";
                     return;
                 }
                 else
                 {
+                    lableError.Content = "";
                     stPanelMail.Visibility = Visibility.Collapsed;
                     stPanelCod.Visibility = Visibility.Visible;
+                    stLinkBack.Visibility = Visibility.Visible;
+                    btGo.Content = "Войти";
                     Random random = new Random();
                     code = Convert.ToString(random.Next(1000, 10000));
-                    _emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: "+ code);
+                    //_emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: "+ code);
                 }
             }
             catch (Exception ex)
@@ -81,10 +92,7 @@ namespace StudentTesting.View.Pages
 
                 if (Regex.IsMatch(clipboard, "^\\d+$"))
                 {
-                    tbCod1.Text = string.Empty;
-                    tbCod2.Text = string.Empty;
-                    tbCod3.Text = string.Empty;
-                    tbCod4.Text = string.Empty;
+                    clearTextBox();
                     tbCod1.Text = clipboard[0].ToString();
                     tbCod2.Text = clipboard[1].ToString();
                     tbCod3.Text = clipboard[2].ToString();
@@ -92,6 +100,22 @@ namespace StudentTesting.View.Pages
                 }
             }
         }
-    }
-    
+
+        private void clearTextBox()
+        {
+            tbCod1.Text = string.Empty;
+            tbCod2.Text = string.Empty;
+            tbCod3.Text = string.Empty;
+            tbCod4.Text = string.Empty;
+        }
+        private void tbLinkBack_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            stLinkBack.Visibility = Visibility.Collapsed;
+            stPanelCod.Visibility = Visibility.Collapsed;
+            stPanelMail.Visibility = Visibility.Visible;
+            lableError.Content = "";
+            btGo.Content = "Отправить код";
+            clearTextBox();
+        }
+    }   
 }

@@ -20,7 +20,7 @@ namespace StudentTesting.View.Pages
     /// </summary>
     public partial class PageMain : Page
     {
-        internal PageMain(bool role)
+        internal PageMain(int id)
         {
             InitializeComponent();
         }
