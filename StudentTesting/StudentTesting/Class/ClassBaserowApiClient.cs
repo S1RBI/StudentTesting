@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net.Http;
@@ -10,7 +11,7 @@ using Newtonsoft.Json;
 internal class ClassBaserowApiClient
 {
     private readonly HttpClient _httpClient;
-    internal ClassBaserowApiClient()
+    private ClassBaserowApiClient()
     {
         _httpClient = new HttpClient { BaseAddress = new Uri(ConfigurationManager.AppSettings["BaserowBaseUrl"]) };
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", ConfigurationManager.AppSettings["BaserowToken"]);
@@ -23,8 +24,19 @@ internal class ClassBaserowApiClient
         return await response.Content.ReadAsStringAsync();
     }
 
+    internal async Task<Student> GetStudentByEmailAsync(string tableId, string email)
+    {
+        return JsonConvert.DeserializeObject<Response<Student>>(await GetRecordsAsync(tableId)).Results.FirstOrDefault(r => r.Mail == email);
+    }
+    internal async Task<List<TestStudent>> GetTestStudentByIdAsync(string tableId, int id)
+    {
+        return JsonConvert.DeserializeObject<Response<TestStudent>>(await GetRecordsAsync(tableId)).Results
+                                   .Where(r => r.Student.Any(student => student.Id == id))
+                                   .ToList();
+    }
+
     // Метод для обновления записи
-    private async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
+    internal async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
     {
         var content = new StringContent(JsonConvert.SerializeObject(updateObject), System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"database/rows/table/{tableId}/{idObject}/?user_field_names=true")
@@ -35,25 +47,20 @@ internal class ClassBaserowApiClient
         return response.IsSuccessStatusCode;
     }
 
-    internal async Task<Record> GetRecordByEmailAsync(string tableId, string email)
-    {
-        return JsonConvert.DeserializeObject<RecordsResponse>(await GetRecordsAsync(tableId)).Results.FirstOrDefault(r => r.mail == email);
-    }
-
     //пример
-    internal async Task<bool> UpdateRecordByEmailAsync(string tableId, string email, Record updatedRecord)
+    internal async Task<bool> UpdateStudebtByEmailAsync(string tableId, string email, Student updatedRecord)
     {
         // Находим запись по email
-        var existingRecord = await GetRecordByEmailAsync(tableId, email);
+        var existingRecord = await GetStudentByEmailAsync(tableId, email);
         if (existingRecord == null) return false; // Запись с таким email не найдена
 
         // Обновляем данные в найденной записи
-        existingRecord.name = updatedRecord.name;
-        existingRecord.surname = updatedRecord.surname;
+        existingRecord.Name = updatedRecord.Name;
+        existingRecord.Surname = updatedRecord.Surname;
 
-        if (await UpdateRecordAsync(tableId, existingRecord, existingRecord.id))  
+        if (await UpdateRecordAsync(tableId, existingRecord, existingRecord.Id))
             return true;
         else
-            return false;     
+            return false;
     }
 }

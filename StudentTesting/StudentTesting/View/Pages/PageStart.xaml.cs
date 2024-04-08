@@ -47,7 +47,7 @@ namespace StudentTesting.View.Pages
             {
                 if (stPanelMail.Visibility == Visibility.Collapsed)
                 {
-                    if (code == (tbCod1.Text+ tbCod2.Text + tbCod3.Text + tbCod4.Text))
+                    if (code == (tbCod1.Text + tbCod2.Text + tbCod3.Text + tbCod4.Text))
                     {
                         NavigationService.Navigate(new PageMain(id));
                     }
@@ -58,8 +58,8 @@ namespace StudentTesting.View.Pages
                     }
                     return;
                 }
-                var currentRecord = await _baserowApiClient.GetRecordByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
-                id = currentRecord.id;
+                var currentRecord = await _baserowApiClient.GetStudentByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
+                id = currentRecord.Id;
                 if (currentRecord == null)
                 {
                     lableError.Content = "Введен не верный пароль";
@@ -74,7 +74,7 @@ namespace StudentTesting.View.Pages
                     btGo.Content = "Войти";
                     Random random = new Random();
                     code = Convert.ToString(random.Next(1000, 10000));
-                    //_emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: "+ code);
+                    _emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: " + code);
                 }
             }
             catch (Exception ex)

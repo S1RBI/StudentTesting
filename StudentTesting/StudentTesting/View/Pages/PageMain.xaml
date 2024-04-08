@@ -11,6 +11,21 @@
       Title="Тестирование студентов">
 
     <Grid>
-        <Button x:Name="btGo" Click="btGo_Click"  Content="Назад" Width="100" Height="40" HorizontalAlignment="Center"/>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE1E4FF">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ListView x:Name="lvSubject" Grid.Row="1" SelectionMode="Multiple">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Value}"></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+            <StackPanel x:Name="stPanelCod" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btGo" Click="btGo_Click"  Content="Назад" Width="100" Height="40" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>
