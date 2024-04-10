@@ -22,15 +22,22 @@ namespace StudentTesting.View.Pages
     /// </summary>
     public partial class PageMain : Page
     {
+        // Экземпляр клиента API Baserow, который будет использоваться для взаимодействия с API.
         private readonly ClassBaserowApiClient _baserowApiClient;
-        private int idGlobal;
+
+        // Глобальный идентификатор, который будет использоваться в пределах класса.
+        private int _idGlobal;
         public PageMain(int id)
         {
             InitializeComponent();
+            // Создаем новый экземпляр ClassBaserowApiClient для взаимодействия с API Baserow.
             _baserowApiClient = new ClassBaserowApiClient();
-            idGlobal = id;
 
-            // Лучше использовать событие Loaded или подобное
+            // Сохраняем глобальный идентификатор для дальнейшего использования в классе.
+            _idGlobal = id;
+
+            // Подписываемся на событие Loaded для текущего класса.
+            // Как только событие произойдет, будет асинхронно загружены данные.
             this.Loaded += async (sender, args) => await LoadDataAsync();
         }
 
@@ -38,10 +45,16 @@ namespace StudentTesting.View.Pages
         {
             try
             {
-                var testStudents = await _baserowApiClient.GetTestStudentByIdAsync(ConfigurationManager.AppSettings["TestStudent"], idGlobal);
+                // Получаем тесты студентов по указанному идентификатору, используя Baserow API.
+                var testStudents = await _baserowApiClient.GetTestStudentByIdAsync(ConfigurationManager.AppSettings["TestStudent"], _idGlobal);
+
+                // Проверяем, что коллекция testStudents не равна null и содержит элементы.
                 if (testStudents != null && testStudents.Any())
                 {
+                    // Если есть тестовые студенты, извлекаем все тесты и объединяем их в один список.
                     var allTests = testStudents.SelectMany(ts => ts.Test).ToList();
+
+                    // Обновляем представление списка с использованием полученных тестов.
                     UpdateListView(allTests);
                 }
             }
@@ -53,10 +66,15 @@ namespace StudentTesting.View.Pages
 
         private void UpdateListView(IEnumerable<StructJson> tests)
         {
+            // Устанавливаем коллекцию тестов как источник данных для ListView 'lvSubject',
+            // что позволяет отобразить эти тесты в пользовательском интерфейсе.
             lvSubject.ItemsSource = tests;
         }
-        private void btGo_Click(object sender, RoutedEventArgs e)
+
+        private void btnGo_Click(object sender, RoutedEventArgs e)
         {
+            // Навигируем к новой странице PageStart с помощью NavigationService,
+            // переводя пользователя на другую страницу в приложении.
             NavigationService.Navigate(new PageStart());
         }
     }

@@ -28,8 +28,8 @@ namespace StudentTesting.View.Pages
     {
         private readonly ClassBaserowApiClient _baserowApiClient;
         private readonly ClassNet _emailSender;
-        private string code;
-        private int id;
+        private string _code;
+        private int _id;
         internal PageStart()
         {
             
@@ -47,19 +47,22 @@ namespace StudentTesting.View.Pages
             {
                 if (stPanelMail.Visibility == Visibility.Collapsed)
                 {
-                    if (code == (tbCod1.Text + tbCod2.Text + tbCod3.Text + tbCod4.Text))
+                    if (_code == (tbCod1.Text + tbCod2.Text + tbCod3.Text + tbCod4.Text))
                     {
-                        NavigationService.Navigate(new PageMain(id));
+                        NavigationService.Navigate(new PageMain(_id));
                     }
                     else
                     {
                         clearTextBox();
                         lableError.Content = "Введен не верный код";
                     }
+
                     return;
                 }
+
                 var currentRecord = await _baserowApiClient.GetStudentByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
-                id = currentRecord.Id;
+                _id = currentRecord.Id;
+
                 if (currentRecord == null)
                 {
                     lableError.Content = "Введен не верный пароль";
@@ -73,8 +76,8 @@ namespace StudentTesting.View.Pages
                     stLinkBack.Visibility = Visibility.Visible;
                     btGo.Content = "Войти";
                     Random random = new Random();
-                    code = Convert.ToString(random.Next(1000, 10000));
-                    _emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: " + code);
+                    _code = Convert.ToString(random.Next(1000, 10000));
+                    _emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: " + _code);
                 }
             }
             catch (Exception ex)

@@ -25,14 +25,14 @@ internal class TestStudent
     [JsonProperty("test")]
     public List<StructJson> Test { get; set; }
 }
-
+//Класс для списка наследуемых значений
 internal class StructJson
 {
     [JsonProperty("id")]
-    public int Id { get; set; }
+    public int Id { get; set; } //содержит значение id наследуемой таблицы по которому можно найти запись в основной таблице
 
     [JsonProperty("value")]
-    public string Value { get; set; }
+    public string Value { get; set; } //содержит значение первого столбца после id
 }
 
 public class Student
@@ -58,7 +58,7 @@ public class Student
     [JsonProperty("group")]
     public string Group { get; set; }
 }
-
+//Класс для хранения списка записей таблицы
 internal class Response<T>
 {
     public string count { get; set; }
