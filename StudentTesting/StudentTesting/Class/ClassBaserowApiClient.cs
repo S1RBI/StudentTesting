@@ -20,7 +20,6 @@ internal class ClassBaserowApiClient
         // Устанавливаем заголовок авторизации для HTTP-запросов, используя токен, 
         // полученный из конфигурационного файла.
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", ConfigurationManager.AppSettings["BaserowToken"]);
-
     }
 
     //Метод для получения записей
@@ -36,19 +35,51 @@ internal class ClassBaserowApiClient
         return await response.Content.ReadAsStringAsync();
 
     }
+
+    private async Task<string> SearchRecordsAsync(string tableId, string search, string column)
+    {
+        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&search={Uri.EscapeDataString(column + ":" + search)}");
+
+        // После получения ответа от сервера читаем содержимое тела ответа асинхронно как строку.
+        return await response.Content.ReadAsStringAsync();
+
+    }
+
+    private async Task<string> GetExcludeRecordsAsync(string tableId, string excludeParameter)
+    {
+        // Выполняем асинхронный GET-запрос к серверу, используя HttpClient.
+        // Запрашиваем строки из конкретной таблицы Baserow по её идентификатору (tableId).
+        // Параметр `user_field_names=true` указывает на то, что имена полей в ответе
+        // должны быть как установлено пользователем, а не их технические идентификаторы.
+        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&exclude={Uri.EscapeDataString(excludeParameter)}");
+
+        // После получения ответа от сервера читаем содержимое тела ответа асинхронно как строку.
+        return await response.Content.ReadAsStringAsync();
+
+    }
+
+    // Функция для выполнения GET-запроса к таблице с фильтром
+    private async Task<string> GetRecordsWithFilterAsync(string tableId, string filter)
+    {
+        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&filters={filter}");
+        return await response.Content.ReadAsStringAsync();
+    }
+
     // Метод для получения информации о студенте по его адресу электронной почты.
     // Возвращает объект Student или null, если студент не найден.
-    internal async Task<Student> GetStudentByEmailAsync(string tableId, string email)
+    internal async Task<Student> GetStudentByEmailAsync(string email)
     {
         // Получаем данные из таблицы с указанным идентификатором: var recordsJson = await GetRecordsAsync(tableId);
         // Десериализуем JSON-строку в объект Response<Student>: var response = JsonConvert.DeserializeObject<Response<Student>>(recordsJson);
         // Ищем первую запись с указанным адресом электронной почты и возвращаем её.
         // Если такой студент не найден, возвращаем null.
-        return JsonConvert.DeserializeObject<Response<Student>>(await GetRecordsAsync(tableId)).Results.FirstOrDefault(r => r.Mail == email);
+        return JsonConvert.DeserializeObject<Response<Student>>(await SearchRecordsAsync(ConfigurationManager.AppSettings["Student"], email, "mail")).Results.FirstOrDefault();
+        //return JsonConvert.DeserializeObject<Response<Student>>(await GetRecordsAsync(ConfigurationManager.AppSettings["Student"])).Results.FirstOrDefault(r => r.Mail == email);
     }
+
     // Метод для получения информации о тестах, связанных с определенным студентом по его идентификатору.
     // Возвращает список объектов TestStudent или пустой список, если тесты не найдены.
-    internal async Task<List<TestStudent>> GetTestStudentByIdAsync(string tableId, int id)
+    internal async Task<List<TestStudent>> GetTestStudentByIdAsync(int id)
     {
         // Получаем данные из таблицы с указанным идентификатором: var recordsJson = await GetRecordsAsync(tableId);
 
@@ -59,10 +90,60 @@ internal class ClassBaserowApiClient
         //                               .Where(r => r.Student.Any(student => student.Id == id))
         //                               .ToList();
 
-        return JsonConvert.DeserializeObject<Response<TestStudent>>(await GetRecordsAsync(tableId)).Results
+        return JsonConvert.DeserializeObject<Response<TestStudent>>(await GetRecordsAsync(ConfigurationManager.AppSettings["TestStudent"])).Results
                                    .Where(r => r.Student.Any(student => student.Id == id))
                                    .ToList();
     }
+
+    //Получаем список Subject используя список TestStudent
+    internal async Task<List<StructJson>> GetTestSubjectsByIdAsync(List<StructJson> lisTestStudent)
+    {
+        try
+        {
+            string[] excludedColumns = new string[] { "fileJSON" };
+            string excludeParameter = string.Join(",", excludedColumns);
+            var response = await GetExcludeRecordsAsync(ConfigurationManager.AppSettings["Test"], excludeParameter);
+
+            return JsonConvert.DeserializeObject<Response<Test>>(response)?.Results
+                .Where(test => lisTestStudent.Any(student => student.Id == test.Id))
+                .SelectMany(t => t.Subject)
+                .ToList() ?? new List<StructJson>();
+        }
+        catch (Exception ex)
+        {
+            // Обработка исключения
+            Console.WriteLine($"Ошибка: {ex.Message}");
+            return new List<StructJson>();
+        }
+    }
+
+
+    // Функция для десериализации ответа от сервера
+    private List<T> DeserializeResponse<T>(string responseContent)
+    {
+        var response = JsonConvert.DeserializeObject<Response<T>>(responseContent);
+        return response.Results;
+    }
+
+    // Основной метод для получения списка тестов
+    internal async Task<List<Test>> GetTestsByStudentIdAndSubjectIdAsync(int studentId, int subjectId)
+    {
+        string studentFilter = $"{{\"filter_type\": \"AND\", \"filters\": [{{\"field\": \"student\", \"type\": \"link_row_has\", \"value\": \"{studentId}\"}}]}}";
+        string studentResponse = await GetRecordsWithFilterAsync(ConfigurationManager.AppSettings["TestStudent"], Uri.EscapeDataString(studentFilter));
+
+        string[] excludedColumns = new string[] { "fileJSON" };
+        string excludeParameter = string.Join(",", excludedColumns);
+        string subjectFilter = $"{{\"filter_type\": \"AND\", \"filters\": [{{\"field\": \"subject\", \"type\": \"link_row_has\", \"value\": \"{subjectId}\"}}]}}";
+        string subjectResponse = await GetRecordsWithFilterAsync(ConfigurationManager.AppSettings["Test"], Uri.EscapeDataString(subjectFilter) + "&exclude=" + Uri.EscapeDataString(excludeParameter));
+        
+        var studentTests = DeserializeResponse<TestStudent>(studentResponse);
+        var subjectTests = DeserializeResponse<Test>(subjectResponse);
+
+        var filteredSubjectTests = subjectTests.Where(s => studentTests.Any(st => st.Id == s.Id)).ToList();
+
+        return filteredSubjectTests;
+    }
+
 
     // Метод для обновления записи
     internal async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
@@ -87,7 +168,7 @@ internal class ClassBaserowApiClient
     internal async Task<bool> UpdateStudentByEmailAsync(string tableId, string email, Student updatedRecord)
     {
         // Находим запись по email
-        var existingRecord = await GetStudentByEmailAsync(tableId, email);
+        var existingRecord = await GetStudentByEmailAsync(email);
         if (existingRecord == null) return false; // Запись с таким email не найдена
 
         // Обновляем данные в найденной записи

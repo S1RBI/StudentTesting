@@ -30,41 +30,37 @@ namespace StudentTesting.View.Pages
         public PageMain(int id)
         {
             InitializeComponent();
-            // Создаем новый экземпляр ClassBaserowApiClient для взаимодействия с API Baserow.
             _baserowApiClient = new ClassBaserowApiClient();
-
-            // Сохраняем глобальный идентификатор для дальнейшего использования в классе.
             _idGlobal = id;
+            Loaded += PageMain_Loaded;
+        }
 
-            // Подписываемся на событие Loaded для текущего класса.
-            // Как только событие произойдет, будет асинхронно загружены данные.
-            this.Loaded += async (sender, args) => await LoadDataAsync();
+        private async void PageMain_Loaded(object sender, RoutedEventArgs e)
+        {
+            await LoadDataAsync();
         }
 
         private async Task LoadDataAsync()
         {
             try
             {
-                // Получаем тесты студентов по указанному идентификатору, используя Baserow API.
-                var testStudents = await _baserowApiClient.GetTestStudentByIdAsync(ConfigurationManager.AppSettings["TestStudent"], _idGlobal);
+                var testStudents = await _baserowApiClient.GetTestStudentByIdAsync(_idGlobal);
 
-                // Проверяем, что коллекция testStudents не равна null и содержит элементы.
-                if (testStudents != null && testStudents.Any())
+                if (testStudents?.Any() == true)
                 {
-                    // Если есть тестовые студенты, извлекаем все тесты и объединяем их в один список.
-                    var allTests = testStudents.SelectMany(ts => ts.Test).ToList();
+                    var allSubject = (await _baserowApiClient.GetTestSubjectsByIdAsync(testStudents.SelectMany(ts => ts.Test).ToList()))
+                            .Distinct(new StructJsonComparer())
+                            .ToList();
 
-                    // Обновляем представление списка с использованием полученных тестов.
-                    UpdateListView(allTests);
+                    UpdateListView(allSubject);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Произошла ошибка: {ex.Message}");
+                MessageBox.Show($"Произошла ошибка: {ex.ToString()}");
             }
         }
-
-        private void UpdateListView(IEnumerable<StructJson> tests)
+        private void UpdateListView(List<StructJson> tests)
         {
             // Устанавливаем коллекцию тестов как источник данных для ListView 'lvSubject',
             // что позволяет отобразить эти тесты в пользовательском интерфейсе.
@@ -76,6 +72,74 @@ namespace StudentTesting.View.Pages
             // Навигируем к новой странице PageStart с помощью NavigationService,
             // переводя пользователя на другую страницу в приложении.
             NavigationService.Navigate(new PageStart());
+        }
+
+        private async void lvSubject_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Сбрасываем видимость всех вложенных ListView
+            foreach (var item in lvSubject.Items)
+            {
+                var container = lvSubject.ItemContainerGenerator.ContainerFromItem(item) as ListViewItem;
+                if (container != null)
+                {
+                    // Находим вложенный ListView в контейнере
+                    var lvSubItems = FindVisualChild<ListView>(container);
+                    if (lvSubItems != null)
+                    {
+                        // Скрываем вложенный ListView
+                        lvSubItems.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+
+            // Показываем вложенный ListView для выбранного элемента
+            if (lvSubject.SelectedItem is StructJson selectedItem)
+            {
+                var testsForStudentAndSubject = await _baserowApiClient.GetTestsByStudentIdAndSubjectIdAsync(_idGlobal, selectedItem.Id);
+
+                // Получаем контейнер StackPanel для выбранного элемента
+                var container = lvSubject.ItemContainerGenerator.ContainerFromItem(selectedItem) as ListViewItem;
+                if (container != null)
+                {
+                    // Находим вложенный ListView в контейнере
+                    var lvSubItems = FindVisualChild<ListView>(container);
+                    if (lvSubItems != null)
+                    {
+                        // Устанавливаем список тестов в качестве источника данных для вложенного ListView
+                        lvSubItems.ItemsSource = testsForStudentAndSubject;
+                        lvSubItems.Visibility = Visibility.Visible;
+                    }
+                }
+            }
+        }
+        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is childItem)
+                    return (childItem)child;
+                else
+                {
+                    childItem childOfChild = FindVisualChild<childItem>(child);
+                    if (childOfChild != null)
+                        return childOfChild;
+                }
+            }
+            return null;
+        }
+
+        private void SubItemsListView_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            // Проверяем, что sender является ListView и что у него есть выбранный элемент
+            if (sender is ListView lv && lv.SelectedItem != null)
+            {
+                // Теперь безопасно обращаемся к SelectedItem
+                if (lv.SelectedItem is Test selectedItem)
+                {
+                    // Здесь можно выполнить действия с selectedItem
+                }
+            }
         }
     }
 }

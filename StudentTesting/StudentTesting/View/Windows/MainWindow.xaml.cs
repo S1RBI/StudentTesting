@@ -25,6 +25,7 @@ namespace StudentTesting
         {
             InitializeComponent();
             mainFrame.Content = new PageMain(1);
+            //mainFrame.Content = new PageStart();
         }
     }
 }

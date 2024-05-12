@@ -13,11 +13,23 @@
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE1E4FF">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ListView x:Name="lvSubject" SelectionMode="Multiple">
+                <ListView x:Name="lvSubject" SelectionMode="Single" SelectionChanged="lvSubject_SelectionChanged">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
                                 <TextBlock Text="{Binding Value}"></TextBlock>
+                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding NameTest}"></TextBlock>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <EventSetter Event="Selected" Handler="SubItemsListView_SelectionChanged"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
                             </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>

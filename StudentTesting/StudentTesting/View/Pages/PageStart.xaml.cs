@@ -60,7 +60,7 @@ namespace StudentTesting.View.Pages
                     return;
                 }
 
-                var currentRecord = await _baserowApiClient.GetStudentByEmailAsync(ConfigurationManager.AppSettings["Student"], tbName.Text);
+                var currentRecord = await _baserowApiClient.GetStudentByEmailAsync(tbName.Text);
                 _id = currentRecord.Id;
 
                 if (currentRecord == null)

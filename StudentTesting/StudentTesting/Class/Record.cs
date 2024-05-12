@@ -2,6 +2,25 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
+internal class Test
+{
+    [JsonProperty("id")]
+    public int Id { get; set; }
+
+    [JsonProperty("order")]
+    public decimal Order { get; set; }
+
+    [JsonProperty("nameTest")]
+    public string NameTest { get; set; }
+
+    [JsonProperty("subject")]
+    public List<StructJson> Subject { get; set; }
+
+    [JsonProperty("fileJSON")]
+    public string? FileJSON { get; set; }
+
+}
+
 internal class TestStudent
 {
     [JsonProperty("id")]
@@ -25,6 +44,7 @@ internal class TestStudent
     [JsonProperty("test")]
     public List<StructJson> Test { get; set; }
 }
+
 //Класс для списка наследуемых значений
 internal class StructJson
 {
@@ -58,6 +78,7 @@ public class Student
     [JsonProperty("group")]
     public string Group { get; set; }
 }
+
 //Класс для хранения списка записей таблицы
 internal class Response<T>
 {
@@ -65,4 +86,18 @@ internal class Response<T>
     public string next { get; set; }
     public string previous { get; set; }
     public List<T> Results { get; set; }
+}
+
+
+internal class StructJsonComparer : IEqualityComparer<StructJson>
+{
+    public bool Equals(StructJson x, StructJson y)
+    {
+        return x.Value == y.Value && x.Id == y.Id;
+    }
+
+    public int GetHashCode(StructJson obj)
+    {
+        return obj.Value.GetHashCode() ^ obj.Id.GetHashCode();
+    }
 }
