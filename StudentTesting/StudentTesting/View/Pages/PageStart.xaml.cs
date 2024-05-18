@@ -88,7 +88,7 @@ namespace StudentTesting.View.Pages
                     btGo.Content = "Войти";
                     Random random = new Random();
                     _code = Convert.ToString(random.Next(1000, 10000));
-                    _emailSender.SendEmail(tbName.Text, "Одноразовый код", "Код: " + _code);
+                    _emailSender.SendEmail(tbName.Text, "Одноразовый код",_code);
                 }
             }
             catch (Exception ex)

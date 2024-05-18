@@ -70,6 +70,7 @@ namespace StudentTesting.View.Pages
 
         private async void lvSubject_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            lvSubject.IsEnabled = false;
             // Сбрасываем видимость всех вложенных ListView
             foreach (var item in lvSubject.Items)
             {
@@ -105,6 +106,8 @@ namespace StudentTesting.View.Pages
                     }
                 }
             }
+            await Task.Delay(500);
+            lvSubject.IsEnabled = true;
         }
         private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {

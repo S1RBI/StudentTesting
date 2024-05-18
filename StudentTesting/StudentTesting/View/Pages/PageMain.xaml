@@ -38,7 +38,7 @@
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="{Binding Value}"></TextBlock>
-                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged" FontSize="20" Padding="5" Style="{StaticResource MaterialDesignChoiceChipAccentListBox}">
+                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged" FontSize="20" MaxWidth="700" Padding="5" Style="{StaticResource MaterialDesignChoiceChipAccentListBox}">
                                     <ListView.ItemContainerStyle>
                                         <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignChoiceChipAccentListBoxItem}">
                                             <Setter Property="IsEnabled">
