@@ -143,6 +143,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Class\ClassBaserowApiClient.cs" />
+    <Compile Include="Class\ClassFunctions.cs" />
     <Compile Include="Class\ClassNet.cs" />
     <Compile Include="Class\Record.cs" />
     <Compile Include="View\Pages\PageMain.xaml.cs">

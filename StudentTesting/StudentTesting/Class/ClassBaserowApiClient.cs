@@ -48,9 +48,9 @@ internal class ClassBaserowApiClient
         return await response.Content.ReadAsStringAsync();
 
     }
-    private async Task<string> SearchRecordsAsync(string tableId, string search, string column)
+    private async Task<string> SearchRecordsAsync(string tableId, string search)
     {
-        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&search={Uri.EscapeDataString(column + ":" + search)}");
+        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&search={ search}");
 
         // После получения ответа от сервера читаем содержимое тела ответа асинхронно как строку.
         return await response.Content.ReadAsStringAsync();
@@ -77,7 +77,7 @@ internal class ClassBaserowApiClient
         return await response.Content.ReadAsStringAsync();
     }
 
-    private async Task<List<Question>> LoadQuestionsFromFile(string fileUrl)
+    internal async Task<List<Question>> LoadQuestionsFromFile(string fileUrl)
     {
         using (var httpClient = new HttpClient())
         {
@@ -97,7 +97,7 @@ internal class ClassBaserowApiClient
         // Десериализуем JSON-строку в объект Response<Student>: var response = JsonConvert.DeserializeObject<Response<Student>>(recordsJson);
         // Ищем первую запись с указанным адресом электронной почты и возвращаем её.
         // Если такой студент не найден, возвращаем null.
-        return JsonConvert.DeserializeObject<Response<Student>>(await SearchRecordsAsync(ConfigurationManager.AppSettings["Student"], email, "mail")).Results.FirstOrDefault();
+        return JsonConvert.DeserializeObject<Response<Student>>(await SearchRecordsAsync(ConfigurationManager.AppSettings["Student"], email)).Results.FirstOrDefault();
         //return JsonConvert.DeserializeObject<Response<Student>>(await GetRecordsAsync(ConfigurationManager.AppSettings["Student"])).Results.FirstOrDefault(r => r.Mail == email);
     }
 
@@ -149,13 +149,13 @@ internal class ClassBaserowApiClient
         return response.Results;
     }
 
-    internal async Task<List<Question>> GetTestByIDAsync(string id)
+    internal async Task<Test> GetTestByIDAsync(string id)
     {
         try
         {
             var response = await GetRowRecordsAsync(ConfigurationManager.AppSettings["Test"], id);
             var deserializedResponse = JsonConvert.DeserializeObject<Test>(response);
-            return deserializedResponse.Questions = await LoadQuestionsFromFile(deserializedResponse.Files[0].Url);
+            return deserializedResponse;
         }
         catch (Exception ex)
         {
@@ -167,7 +167,7 @@ internal class ClassBaserowApiClient
     }
 
     // Основной метод для получения списка тестов
-    internal async Task<List<Test>> GetTestsByStudentIdAndSubjectIdAsync(int studentId, int subjectId)
+    internal async Task<List<TestStudent>> GetTestsByStudentIdAndSubjectIdAsync(int studentId, int subjectId)
     {
         string studentFilter = $"{{\"filter_type\": \"AND\", \"filters\": [{{\"field\": \"student\", \"type\": \"link_row_has\", \"value\": \"{studentId}\"}}]}}";
         string studentResponse = await GetRecordsWithFilterAsync(ConfigurationManager.AppSettings["TestStudent"], Uri.EscapeDataString(studentFilter));
@@ -180,7 +180,7 @@ internal class ClassBaserowApiClient
         var studentTests = DeserializeResponse<TestStudent>(studentResponse);
         var subjectTests = DeserializeResponse<Test>(subjectResponse);
 
-        var filteredSubjectTests = subjectTests.Where(s => studentTests.Any(st => st.Id == s.Id)).ToList();
+        var filteredSubjectTests = studentTests.Where(s => subjectTests.Any(st => st.Id == s.Id)).ToList();
 
         return filteredSubjectTests;
     }

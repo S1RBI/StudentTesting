@@ -24,8 +24,8 @@ namespace StudentTesting
         public MainWindow()
         {
             InitializeComponent();
-            mainFrame.Content = new PageMain(1);
-            //mainFrame.Content = new PageStart();
+            //mainFrame.Content = new PageMain(1, "Михейкин Юрий Андреевич");
+            mainFrame.Content = new PageStart();
         }
     }
 }

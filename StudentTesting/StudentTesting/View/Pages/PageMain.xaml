@@ -4,24 +4,76 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:StudentTesting.View.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
-      FontFamily="Tahoma"
-      Background="White"
+      FontFamily="{materialDesign:MaterialDesignFont}"
+      FontSize="20"
       d:DesignHeight="500" d:DesignWidth="900"
       Title="Тестирование студентов">
 
-    <Grid>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE1E4FF">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ListView x:Name="lvSubject" SelectionMode="Single" SelectionChanged="lvSubject_SelectionChanged">
+    <Page.Resources>
+        <local:TestEnabledMultiConverter x:Key="TestEnabledMultiConverter"/>
+        <local:DateTimeHasPassedConverter x:Key="DateTimeHasPassedConverter"/>
+        <local:TestDateTimeStatusConverter x:Key="TestDateTimeStatusConverter"/>
+        <local:BallToColorConverter x:Key="BallToColorConverter"/>
+        <ContextMenu x:Key="ExitContextMenu">
+            <MenuItem Header="Выйти на экран авторизации" Click="MenuItem_ClickGoBack"/>
+            <MenuItem Header="Выйти из программы" Click="MenuItem_ClickExit"/>
+        </ContextMenu>
+    </Page.Resources>
+    <Grid Background="#FFE1E4FF">
+        <TextBlock x:Name="txtBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="15"/>
+        <Button x:Name="btnExit" Content="Выход" Click="btnExit_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,13,13,0" Style="{StaticResource MaterialDesignFlatButton}" Cursor="Hand">
+            <Button.ContextMenu>
+                <StaticResource ResourceKey="ExitContextMenu"/>
+            </Button.ContextMenu>
+        </Button>
+        <Border MinWidth="400"  Background="#ffffff"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,60,0,0" Padding="30">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+            </Border.Effect>
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <ListView x:Name="lvSubject" SelectionMode="Single" SelectionChanged="lvSubject_SelectionChanged" FontSize="30" Style="{StaticResource MaterialDesignListView}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="{Binding Value}"></TextBlock>
-                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged">
+                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged" FontSize="20" Padding="5" Style="{StaticResource MaterialDesignChoiceChipAccentListBox}">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignChoiceChipAccentListBoxItem}">
+                                            <Setter Property="IsEnabled">
+                                                <Setter.Value>
+                                                    <MultiBinding Converter="{StaticResource TestEnabledMultiConverter}">
+                                                        <Binding Path="Check"/>
+                                                        <Binding Path="DateTime"/>
+                                                    </MultiBinding>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding NameTest}"></TextBlock>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <CheckBox IsChecked="{Binding Check}" Padding="5"  Content="{Binding Test[0].Value}" IsEnabled="False" Style="{StaticResource MaterialDesignFilterChipPrimaryCheckBox}"/>
+                                                <TextBlock Padding="5">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding DateTime, Converter={StaticResource TestDateTimeStatusConverter}}"/>
+                                                            <Setter Property="Foreground" Value="Green"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DateTime, Converter={StaticResource DateTimeHasPassedConverter}}" Value="True">
+                                                                    <Setter Property="Foreground" Value="Red"/>
+                                                                    <Setter Property="Text" Value="Тест закрыт"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Check}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{Binding Ball, Converter={StaticResource BallToColorConverter}}"/>
+                                                                    <Setter Property="Text" Value="{Binding Ball, StringFormat='Оценка: {0}'}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
@@ -30,9 +82,6 @@
                     </ListView.ItemTemplate>
                 </ListView>
             </StackPanel>
-            <StackPanel x:Name="stPanelCod" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="btnGo" Click="btnGo_Click"  Content="Назад" Width="100" Height="40" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </StackPanel>
+        </Border>
     </Grid>
 </Page>

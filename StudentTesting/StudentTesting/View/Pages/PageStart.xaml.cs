@@ -29,7 +29,7 @@ namespace StudentTesting.View.Pages
         private readonly ClassBaserowApiClient _baserowApiClient;
         private readonly ClassNet _emailSender;
         private string _code;
-        private int _id;
+        private Student _student;
         internal PageStart()
         {
             
@@ -51,25 +51,32 @@ namespace StudentTesting.View.Pages
             {
                 if (stPanelMail.Visibility == Visibility.Collapsed)
                 {
-                    if (_code == (tbCod1.Text + tbCod2.Text + tbCod3.Text + tbCod4.Text))
+                    string enteredCode = tbCod1.Text + tbCod2.Text + tbCod3.Text + tbCod4.Text;
+
+                    if (!string.IsNullOrWhiteSpace(enteredCode) && enteredCode == _code)
                     {
-                        NavigationService.Navigate(new PageMain(_id));
+                        NavigationService.Navigate(new PageMain(_student.Id, $"{_student.Surname} {_student.Name} {_student.Patronymic}"));
                     }
                     else
                     {
                         clearTextBox();
-                        lableError.Content = "Введен не верный код";
+                        lableError.Content = "Введен неверный код";
                     }
+                    return;
+                }
 
+                if (string.IsNullOrWhiteSpace(tbName.Text))
+                {
+                    lableError.Content = "Пожалуйста, введите адрес электронной почты!";
                     return;
                 }
 
                 var currentRecord = await _baserowApiClient.GetStudentByEmailAsync(tbName.Text);
-                _id = currentRecord.Id;
+                _student = currentRecord;
 
                 if (currentRecord == null)
                 {
-                    lableError.Content = "Введен не верный пароль";
+                    lableError.Content = "Не верный адрес электронной почты!";
                     return;
                 }
                 else

@@ -27,9 +27,10 @@ namespace StudentTesting.View.Pages
 
         // Глобальный идентификатор, который будет использоваться в пределах класса.
         private int _idGlobal;
-        public PageMain(int id)
+        public PageMain(int id, string fullName)
         {
             InitializeComponent();
+            txtBlock.Text = fullName;
             _baserowApiClient = new ClassBaserowApiClient();
             _idGlobal = id;
             Loaded += PageMain_Loaded;
@@ -65,13 +66,6 @@ namespace StudentTesting.View.Pages
             // Устанавливаем коллекцию тестов как источник данных для ListView 'lvSubject',
             // что позволяет отобразить эти тесты в пользовательском интерфейсе.
             lvSubject.ItemsSource = tests;
-        }
-
-        private void btnGo_Click(object sender, RoutedEventArgs e)
-        {
-            // Навигируем к новой странице PageStart с помощью NavigationService,
-            // переводя пользователя на другую страницу в приложении.
-            NavigationService.Navigate(new PageStart());
         }
 
         private async void lvSubject_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -133,17 +127,41 @@ namespace StudentTesting.View.Pages
         {
             if (e.AddedItems.Count > 0)
             {
-                var selectedItem = e.AddedItems[0] as Test;
-                MessageBoxResult result = MessageBox.Show($"Время на выполнение: {selectedItem.Period} мин.\nКоличество вопросов: {selectedItem.Quantity}", $"Вы уверены что хотите начать {selectedItem.NameTest}", MessageBoxButton.YesNo);
+                var selectedItem = e.AddedItems[0] as TestStudent;
+                var selectedItemTest = await _baserowApiClient.GetTestByIDAsync(selectedItem.Test[0].Id.ToString());
+                MessageBoxResult result = MessageBox.Show($"Время на выполнение: {selectedItemTest.Period} мин.\nКоличество вопросов: {selectedItemTest.Quantity}", $"Вы уверены что хотите начать {selectedItemTest.NameTest}", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
-                    var selectedItemg = await _baserowApiClient.GetTestByIDAsync(selectedItem.Id.ToString());
+                    var deserializedResponse = await _baserowApiClient.LoadQuestionsFromFile(selectedItemTest.Files[0].Url);
                 }
                 else if (result == MessageBoxResult.No)
                 { }
                 else
                 { }
             }
+        }
+
+        private void btnExit_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (button.ContextMenu != null)
+            {
+                button.ContextMenu.PlacementTarget = button;
+                button.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void MenuItem_ClickGoBack(object sender, RoutedEventArgs e)
+        {
+            // Навигируем к новой странице PageStart с помощью NavigationService,
+            // переводя пользователя на другую страницу в приложении.
+            NavigationService.Navigate(new PageStart());
+        }
+
+        private void MenuItem_ClickExit(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }
