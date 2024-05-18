@@ -129,16 +129,20 @@ namespace StudentTesting.View.Pages
             return null;
         }
 
-        private void SubItemsListView_SelectionChanged(object sender, RoutedEventArgs e)
+        private async void SubItemsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Проверяем, что sender является ListView и что у него есть выбранный элемент
-            if (sender is ListView lv && lv.SelectedItem != null)
+            if (e.AddedItems.Count > 0)
             {
-                // Теперь безопасно обращаемся к SelectedItem
-                if (lv.SelectedItem is Test selectedItem)
+                var selectedItem = e.AddedItems[0] as Test;
+                MessageBoxResult result = MessageBox.Show($"Время на выполнение: {selectedItem.Period} мин.\nКоличество вопросов: {selectedItem.Quantity}", $"Вы уверены что хотите начать {selectedItem.NameTest}", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
                 {
-                    // Здесь можно выполнить действия с selectedItem
+                    var selectedItemg = await _baserowApiClient.GetTestByIDAsync(selectedItem.Id.ToString());
                 }
+                else if (result == MessageBoxResult.No)
+                { }
+                else
+                { }
             }
         }
     }

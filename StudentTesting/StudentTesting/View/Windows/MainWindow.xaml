@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:StudentTesting"
-        MinHeight="300"
-        MinWidth="550"
+        MinHeight="500"
+        MinWidth="900"
+        WindowState="Maximized"
         Background="White"
-        FontFamily="Times New Roman"
         mc:Ignorable="d"
         Title="{Binding ElementName=mainFrame, Path=Content.Title}" Height="450" Width="800">
     <Grid>

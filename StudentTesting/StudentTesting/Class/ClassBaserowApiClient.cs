@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 internal class ClassBaserowApiClient
 {
@@ -35,7 +36,18 @@ internal class ClassBaserowApiClient
         return await response.Content.ReadAsStringAsync();
 
     }
+    private async Task<string> GetRowRecordsAsync(string tableId, string idObject)
+    {
+        // Выполняем асинхронный GET-запрос к серверу, используя HttpClient.
+        // Запрашиваем строки из конкретной таблицы Baserow по её идентификатору (tableId).
+        // Параметр `user_field_names=true` указывает на то, что имена полей в ответе
+        // должны быть как установлено пользователем, а не их технические идентификаторы.
+        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/{idObject}/?user_field_names=true");
 
+        // После получения ответа от сервера читаем содержимое тела ответа асинхронно как строку.
+        return await response.Content.ReadAsStringAsync();
+
+    }
     private async Task<string> SearchRecordsAsync(string tableId, string search, string column)
     {
         var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&search={Uri.EscapeDataString(column + ":" + search)}");
@@ -45,13 +57,13 @@ internal class ClassBaserowApiClient
 
     }
 
-    private async Task<string> GetExcludeRecordsAsync(string tableId, string excludeParameter)
+    private async Task<string> GetIncludeExcludeRecordsAsync(string tableId, string excludeParameter, string includeExclude)
     {
         // Выполняем асинхронный GET-запрос к серверу, используя HttpClient.
         // Запрашиваем строки из конкретной таблицы Baserow по её идентификатору (tableId).
         // Параметр `user_field_names=true` указывает на то, что имена полей в ответе
         // должны быть как установлено пользователем, а не их технические идентификаторы.
-        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&exclude={Uri.EscapeDataString(excludeParameter)}");
+        var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&{includeExclude}={Uri.EscapeDataString(excludeParameter)}");
 
         // После получения ответа от сервера читаем содержимое тела ответа асинхронно как строку.
         return await response.Content.ReadAsStringAsync();
@@ -63,6 +75,18 @@ internal class ClassBaserowApiClient
     {
         var response = await _httpClient.GetAsync($"database/rows/table/{tableId}/?user_field_names=true&filters={filter}");
         return await response.Content.ReadAsStringAsync();
+    }
+
+    private async Task<List<Question>> LoadQuestionsFromFile(string fileUrl)
+    {
+        using (var httpClient = new HttpClient())
+        {
+            var response = await httpClient.GetAsync(fileUrl);
+            response.EnsureSuccessStatusCode();
+
+            var fileContent = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<List<Question>>(fileContent);
+        }
     }
 
     // Метод для получения информации о студенте по его адресу электронной почты.
@@ -102,7 +126,7 @@ internal class ClassBaserowApiClient
         {
             string[] excludedColumns = new string[] { "fileJSON" };
             string excludeParameter = string.Join(",", excludedColumns);
-            var response = await GetExcludeRecordsAsync(ConfigurationManager.AppSettings["Test"], excludeParameter);
+            var response = await GetIncludeExcludeRecordsAsync(ConfigurationManager.AppSettings["Test"], excludeParameter, "exclude");
 
             return JsonConvert.DeserializeObject<Response<Test>>(response)?.Results
                 .Where(test => lisTestStudent.Any(student => student.Id == test.Id))
@@ -119,10 +143,27 @@ internal class ClassBaserowApiClient
 
 
     // Функция для десериализации ответа от сервера
-    private List<T> DeserializeResponse<T>(string responseContent)
+    internal List<T> DeserializeResponse<T>(string responseContent)
     {
         var response = JsonConvert.DeserializeObject<Response<T>>(responseContent);
         return response.Results;
+    }
+
+    internal async Task<List<Question>> GetTestByIDAsync(string id)
+    {
+        try
+        {
+            var response = await GetRowRecordsAsync(ConfigurationManager.AppSettings["Test"], id);
+            var deserializedResponse = JsonConvert.DeserializeObject<Test>(response);
+            return deserializedResponse.Questions = await LoadQuestionsFromFile(deserializedResponse.Files[0].Url);
+        }
+        catch (Exception ex)
+        {
+            // Обработка исключения
+            Console.WriteLine($"Ошибка: {ex.Message}");
+            return null;
+        }
+
     }
 
     // Основной метод для получения списка тестов

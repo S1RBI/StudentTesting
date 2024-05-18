@@ -2,6 +2,60 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
+
+internal class Question
+{
+    [JsonProperty("question")]
+    public string QuestionText { get; set; }
+
+    [JsonProperty("type")]
+    public string Type { get; set; }
+
+    [JsonProperty("choices")]
+    public List<string> Choices { get; set; }
+
+    [JsonProperty("correctAnswer")]
+    public string CorrectAnswer { get; set; }
+
+    [JsonProperty("correctAnswers")]
+    public List<string> CorrectAnswers { get; set; }
+
+    [JsonProperty("points")]
+    public int Points { get; set; }
+}
+
+internal class FileMetadata
+{
+    [JsonProperty("url")]
+    public string Url { get; set; }
+
+    [JsonProperty("thumbnails")]
+    public object Thumbnails { get; set; }
+
+    [JsonProperty("visible_name")]
+    public string VisibleName { get; set; }
+
+    [JsonProperty("name")]
+    public string Name { get; set; }
+
+    [JsonProperty("size")]
+    public int Size { get; set; }
+
+    [JsonProperty("mime_type")]
+    public string MimeType { get; set; }
+
+    [JsonProperty("is_image")]
+    public bool IsImage { get; set; }
+
+    [JsonProperty("image_width")]
+    public object ImageWidth { get; set; }
+
+    [JsonProperty("image_height")]
+    public object ImageHeight { get; set; }
+
+    [JsonProperty("uploaded_at")]
+    public DateTime UploadedAt { get; set; }
+}
 internal class Test
 {
     [JsonProperty("id")]
@@ -17,8 +71,16 @@ internal class Test
     public List<StructJson> Subject { get; set; }
 
     [JsonProperty("fileJSON")]
-    public string? FileJSON { get; set; }
+    public List<FileMetadata> Files { get; set; }
 
+    [JsonProperty("quantity")]
+    public int Quantity { get; set; }
+
+    [JsonProperty("period")]
+    public int Period { get; set; }
+
+    [JsonProperty("questions")]
+    public List<Question> Questions { get; set; }
 }
 
 internal class TestStudent
@@ -55,7 +117,7 @@ internal class StructJson
     public string Value { get; set; } //содержит значение первого столбца после id
 }
 
-public class Student
+internal class Student
 {
     [JsonProperty("id")]
     public int Id { get; set; }

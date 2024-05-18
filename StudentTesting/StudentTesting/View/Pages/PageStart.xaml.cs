@@ -37,6 +37,10 @@ namespace StudentTesting.View.Pages
             stPanelCod.Visibility = Visibility.Collapsed;
             stLinkBack.Visibility = Visibility.Collapsed;
 
+            string resourcePath = "pack://application:,,,/Res/";
+            string imagePath = System.IO.Path.Combine(resourcePath, "FullLogo.png");
+            imgPhoto.Source = new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+
             _baserowApiClient = new ClassBaserowApiClient();
             _emailSender = new ClassNet();
         }

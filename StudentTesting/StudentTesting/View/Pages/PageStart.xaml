@@ -4,59 +4,42 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:StudentTesting.View.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       FontFamily="Tahoma"
-      Background="#FFE1E4FF"
-      d:DesignHeight="450" d:DesignWidth="800"
+      FontSize="14"
+      d:DesignHeight="500" d:DesignWidth="900"
       Title="Тестирование студентов">
 
-
-
-    <Grid>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#FFE1E4FF">
-            <StackPanel x:Name="stPanelCod" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Label Content="Код: " VerticalAlignment="Center"/>
-                <TextBox x:Name="tbCod1" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="0,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
-                <TextBox x:Name="tbCod2" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
-                <TextBox x:Name="tbCod3" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
-                <TextBox x:Name="tbCod4" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+    <Grid Background="#FFE1E4FF">
+        <Image x:Name="imgPhoto" MaxWidth="700" MaxHeight="300" VerticalAlignment="Top"/>
+        <Border MinWidth="400"  Background="#ffffff" VerticalAlignment="Center" Padding="30">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+            </Border.Effect>
+            <StackPanel>
+                <StackPanel x:Name="stPanelCod" Orientation="Vertical" HorizontalAlignment="Center">
+                    <Label Content="Введите код отправленный Вам на почту" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBox x:Name="tbCod1" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="0,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                        <TextBox x:Name="tbCod2" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                        <TextBox x:Name="tbCod3" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                        <TextBox x:Name="tbCod4" Padding="3" FontSize="16" VerticalAlignment="Center" Width="20" Margin="10,0,0,0" MaxLength="1" PreviewKeyDown="tbCod_PreviewKeyDown"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel x:Name="stPanelMail" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBox materialDesign:HintAssist.Hint="Введите почту" x:Name="tbName"  FontSize="16" VerticalAlignment="Center" Width="200" Style="{StaticResource MaterialDesignFloatingHintTextBox}"></TextBox>
+                </StackPanel>
+                <StackPanel x:Name="stPanelError" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Label x:Name="lableError" Padding="3" Foreground="Red" Content="" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel x:Name="stLinkBack" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,0">
+                    <TextBlock x:Name="tbLinkBack" Cursor="Hand" MouseLeftButtonUp="tbLinkBack_MouseLeftButtonUp"  TextDecorations="Underline" Foreground="Blue" >вернуться назад</TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Button x:Name="btGo" Click="btGo_Click" Content="Получить код для входа" Width="200" Height="40" HorizontalAlignment="Center" Cursor="Hand"/>
+                </StackPanel>
             </StackPanel>
-            <StackPanel x:Name="stPanelMail" Orientation="Horizontal">
-            <Label Content="Почта: " VerticalAlignment="Center"/>
-        <TextBox x:Name="tbName" Padding="5" FontSize="16" VerticalAlignment="Center" Width="150">
-            <TextBox.Style>
-                <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                    <Style.Resources>
-                        <VisualBrush x:Key="CueBannerBrush" AlignmentX="Left" AlignmentY="Center" Stretch="None">
-                            <VisualBrush.Visual>
-                                <Label Content="Введите почту" Foreground="SlateGray" />
-                            </VisualBrush.Visual>
-                        </VisualBrush>
-                    </Style.Resources>
-                    <Style.Triggers>
-                        <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
-                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                        </Trigger>
-                        <Trigger Property="Text" Value="{x:Null}">
-                            <Setter Property="Background" Value="{StaticResource CueBannerBrush}" />
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter Property="Background" Value="White" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-        </TextBox>
-            </StackPanel>
-            <StackPanel x:Name="stPanelError" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Label x:Name="lableError" Padding="3" Foreground="Red" Content="" VerticalAlignment="Center"/>
-            </StackPanel>
-            <StackPanel x:Name="stLinkBack" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,0">
-                <TextBlock x:Name="tbLinkBack" Cursor="Hand" MouseLeftButtonUp="tbLinkBack_MouseLeftButtonUp"  TextDecorations="Underline" Foreground="Blue" >вернуться назад</TextBlock>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button x:Name="btGo" Click="btGo_Click" Content="Отправить код" Width="100" Height="40" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </StackPanel>
+        </Border>
     </Grid>
 </Page>
