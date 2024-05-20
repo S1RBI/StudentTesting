@@ -135,15 +135,6 @@ namespace StudentTesting.View.Pages
             animationTimer.Start();
         }
 
-        private void NavigateToResultsPage()
-        {
-            // Используем Dispatcher для перехода на другую страницу
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-            });
-        }
-
-
         private void lvButton_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
@@ -371,6 +362,24 @@ namespace StudentTesting.View.Pages
                 await _baserowApiClient.UpdateStudentByIDAsync(_idStudent.ToString(), _idTest.ToString(), resultTest);
                 NavigationService.Navigate(new PageResult(resultTest, _fullName, _nameTest, _idStudent));
             }
+        }
+
+        private async void NavigateToResultsPage()
+        {
+            // Переход на другую страницу в UI-потоке
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                lvButton.SelectedItem = lvButton.Items[0];
+            });
+            double resultTest = GetResultTest();
+            // Асинхронный вызов вне лямбда-выражения
+            await _baserowApiClient.UpdateStudentByIDAsync(_idStudent.ToString(), _idTest.ToString(), resultTest);
+
+            // Переход на другую страницу в UI-потоке
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                NavigationService.Navigate(new PageResult(resultTest, _fullName, _nameTest, _idStudent));
+            });
         }
     }   
 }
