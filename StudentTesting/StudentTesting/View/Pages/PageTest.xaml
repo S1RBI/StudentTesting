@@ -4,14 +4,77 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:StudentTesting.View.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
-      FontFamily="Tahoma"
-      Background="White"
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="Тестирование студентов"
->
+      FontFamily="{materialDesign:MaterialDesignFont}"
+      FontSize="20"
+      d:DesignHeight="500" d:DesignWidth="900"
+      Title="Тестирование студентов">
 
-    <Grid>
-        
+    <Page.Resources>
+        <!--MaterialDesignChoiceChipPrimaryListBox-->
+        <!--MaterialDesignChoiceChipAccentOutlineListBox-->
+    </Page.Resources>
+    <Grid Background="#d1c2f0">
+        <TextBlock x:Name="txtBlockStudentFullName" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="15"/>
+        <TextBlock x:Name="txtBlockTestName" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="15"/>
+        <TextBlock x:Name="txtBlockTime" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="15"/>
+        <Border MinWidth="300" MaxWidth="300" Background="White"  HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="10,60,10,10" CornerRadius="30" Padding="15">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+            </Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ListBox ItemsSource="{Binding Items}" Grid.Row="0" x:Name="lvButton" SelectionChanged="lvButton_SelectionChanged" SelectionMode="Single" FontSize="17">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding}" Width="35" Height="35" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" Opacity="1" IsEnabled="False"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Grid.Row="1" x:Name="btEnd" Click="btEnd_Click" Content="Завершить тест" Width="200" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Center" Cursor="Hand" Style="{StaticResource MaterialDesignFlatButton}"/>
+            </Grid>
+        </Border>
+        <Border Background="#FFE1E4FF"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="320,60,10,10" CornerRadius="30" Padding="15">
+            <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TextBlock x:Name="tbInformation" HorizontalAlignment="Center"></TextBlock>
+                
+                <StackPanel x:Name="spSingleChoice" Margin="0,50,0,0"  Tag="SingleChoice" Visibility="Collapsed">
+                    <TextBlock x:Name="tbChois" Padding="5" HorizontalAlignment="Left" FontSize="15" Text="Выберите один вариант:"></TextBlock>
+                    <ListView x:Name="lvChoices" Margin="10" FontSize="15">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton Padding="5" GroupName="Choices" Content="{Binding}" 
+                                 IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+
+                <StackPanel x:Name="spMultipleChoice" Margin="0,50,0,0"  Tag="MultipleChoice" Visibility="Collapsed">
+                    <TextBlock x:Name="tbMultipleChoice" Padding="5" HorizontalAlignment="Left" FontSize="15" Text="Выберите несколько вариантов:"></TextBlock>
+                    <ListView x:Name="lvMultipleChoice" Margin="10" FontSize="15" SelectionMode="Multiple">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Padding="5" Content="{Binding}" 
+                              IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+
+                <StackPanel x:Name="spTextAnswer" Tag="TextAnswer" Margin="0,50,0,0" Visibility="Collapsed" >
+                    <TextBox Style="{StaticResource MaterialDesignFilledTextFieldTextBox}" x:Name="txtBoxChoice" FontSize="15" materialDesign:HintAssist.Hint="Введите ответ" Background="White" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"></TextBox>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>

@@ -1,0 +1,48 @@
+﻿<Page x:Class="StudentTesting.View.Pages.PageResult"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:StudentTesting.View.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      mc:Ignorable="d" 
+      FontFamily="{materialDesign:MaterialDesignFont}"
+      FontSize="20"
+      d:DesignHeight="500" d:DesignWidth="900"
+      Title="Тестирование студентов">
+
+    <Page.Resources>
+        <ContextMenu x:Key="ExitContextMenu">
+            <MenuItem Header="Выйти на страницу тестирования" Click="MenuItem_ClickGoMain"/>
+            <MenuItem Header="Выйти на страрицу авторизации" Click="MenuItem_ClickGoStart"/>
+            <MenuItem Header="Выйти из программы" Click="MenuItem_ClickGoExit"/>
+        </ContextMenu>
+    </Page.Resources>
+    <Grid Background="#aa7eb4">
+        <TextBlock x:Name="txtBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="15"/>
+        <Button x:Name="btnExit" FontSize="20" Foreground="Black" Content="Выход" Click="btnExit_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,13,13,0" Style="{StaticResource MaterialDesignOutlinedButton}" Cursor="">
+            <Button.ContextMenu>
+                <StaticResource ResourceKey="ExitContextMenu"/>
+            </Button.ContextMenu>
+        </Button>
+        <Border MinWidth="400" CornerRadius="60" Background="#bc96c4 "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,60,10,10" Padding="20">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+            </Border.Effect>
+            <Border MinWidth="400" CornerRadius="50" Background="#cdb0d4"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Padding="30">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+                </Border.Effect>
+                <Border MinWidth="400" CornerRadius="30" Background="#ddc7e2 "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Padding="30">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+                    </Border.Effect>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"> 
+                    <TextBlock x:Name="txtBlockTest"  FontSize="35" Padding="15"/>
+                    <TextBlock x:Name="txtBlockResult"  FontSize="40" Padding="15"/>
+                    </StackPanel>
+                </Border>
+            </Border>
+        </Border>
+    </Grid>
+</Page>

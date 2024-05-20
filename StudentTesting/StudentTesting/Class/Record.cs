@@ -14,14 +14,13 @@ internal class Question
     [JsonProperty("choices")]
     public List<string> Choices { get; set; }
 
-    [JsonProperty("correctAnswer")]
-    public string CorrectAnswer { get; set; }
-
     [JsonProperty("correctAnswers")]
     public List<string> CorrectAnswers { get; set; }
 
     [JsonProperty("points")]
-    public int Points { get; set; }
+    public double Points { get; set; }
+
+    public List<string> Answer { get; set; } = new List<string>();
 }
 
 internal class FileMetadata
@@ -98,7 +97,7 @@ internal class TestStudent
     public List<StructJson> Student { get; set; }
 
     [JsonProperty("ball")]
-    public int? Ball { get; set; }
+    public double Ball { get; set; }
 
     [JsonProperty("check")]
     public bool Check { get; set; }

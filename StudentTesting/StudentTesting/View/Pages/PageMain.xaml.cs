@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -27,12 +28,16 @@ namespace StudentTesting.View.Pages
 
         // Глобальный идентификатор, который будет использоваться в пределах класса.
         private int _idGlobal;
-        public PageMain(int id, string fullName)
+
+        private string _fullNameGlobal;
+        internal PageMain(int id, string fullName)
         {
+            _baserowApiClient = new ClassBaserowApiClient();
+            _fullNameGlobal = fullName;
+            _idGlobal = id;
+
             InitializeComponent();
             txtBlock.Text = fullName;
-            _baserowApiClient = new ClassBaserowApiClient();
-            _idGlobal = id;
             Loaded += PageMain_Loaded;
         }
 
@@ -131,17 +136,52 @@ namespace StudentTesting.View.Pages
             if (e.AddedItems.Count > 0)
             {
                 var selectedItem = e.AddedItems[0] as TestStudent;
+                if (selectedItem == null || selectedItem.Test == null || selectedItem.Test.Count == 0)
+                {
+                    MessageBox.Show("Неверный выбор. Попробуйте снова.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                await HandleTestSelectionAsync(selectedItem);
+            }
+        }
+
+        private async Task HandleTestSelectionAsync(TestStudent selectedItem)
+        {
+            try
+            {
                 var selectedItemTest = await _baserowApiClient.GetTestByIDAsync(selectedItem.Test[0].Id.ToString());
-                MessageBoxResult result = MessageBox.Show($"Время на выполнение: {selectedItemTest.Period} мин.\nКоличество вопросов: {selectedItemTest.Quantity}", $"Вы уверены что хотите начать {selectedItemTest.NameTest}", MessageBoxButton.YesNo);
+                if (selectedItemTest == null)
+                {
+                    MessageBox.Show("Не удалось получить детали теста. Попробуйте позже.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var message = $"Время на выполнение: {selectedItemTest.Period} мин.\nКоличество вопросов: {selectedItemTest.Quantity}";
+
+                var result = MessageBox.Show(message, $"Вы уверены, что хотите начать {selectedItemTest.NameTest}?", MessageBoxButton.YesNo);
+                
                 if (result == MessageBoxResult.Yes)
                 {
                     var deserializedResponse = await _baserowApiClient.LoadQuestionsFromFile(selectedItemTest.Files[0].Url);
+                    if (deserializedResponse == null)
+                    {
+                        MessageBox.Show("Не удалось загрузить вопросы. Попробуйте позже.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    NavigateToTestPage(selectedItemTest, deserializedResponse);
                 }
-                else if (result == MessageBoxResult.No)
-                { }
-                else
-                { }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void NavigateToTestPage(Test selectedItemTest, List<Question> questions)
+        {
+            NavigationService.Navigate(new PageTest(_idGlobal, _fullNameGlobal, selectedItemTest.Id, selectedItemTest.Quantity, selectedItemTest.Period, selectedItemTest.NameTest, questions));
         }
 
         private void btnExit_Click(object sender, RoutedEventArgs e)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -75,17 +76,17 @@ namespace StudentTesting.View.Pages
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is int ball)
+            if (value is double ball)
             {
-                if (ball > 44)
+                if (ball > 44f)
                 {
                     return Brushes.Green;
                 }
-                else if (ball >= 35)
+                else if (ball >= 35f)
                 {
                     return Brushes.Blue;
                 }
-                else if (ball >= 25)
+                else if (ball >= 25f)
                 {
                     return Brushes.Orange;
                 }

@@ -57,7 +57,7 @@ internal class ClassNet
         .logo {
             display: block;
             margin: 0 auto 20px;
-            max-width: 150px;
+            max-width: 200px;
         }
         .footer {
             text-align: center;
@@ -69,7 +69,6 @@ internal class ClassNet
 <body>
     <div class=""container"">
         <img class=""logo"" src=""cid:logo"" alt=""Cazarina Interiors Logo"">
-        <h1>SmartTEST+</h1>
         <p>Привет,</p>
         <p>Вот код, который вы запросили:</p>
         <pre>" + code + @"</pre>

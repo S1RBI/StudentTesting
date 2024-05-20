@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
 internal class ClassBaserowApiClient
@@ -166,6 +167,27 @@ internal class ClassBaserowApiClient
 
     }
 
+    internal async Task<TestStudent> GetTestStudentByIDAsync(string idStudent, string idTest)
+    {
+        try
+        {
+            string studentFilter = $"{{\"filter_type\": \"AND\", \"filters\": [{{\"field\": \"student\", \"type\": \"link_row_has\", \"value\": \"{ idStudent}\"}}, {{\"field\": \"test\", \"type\": \"link_row_has\", \"value\": \"{ idTest}\"}}]}}";
+            //string studentFilter = $"{{\"filter_type\": \"AND\", \"filters\": [{{\"field\": \"student\", \"type\": \"link_row_has\", \"value\": \"{idStudent}\"}}]}}";
+            string studentResponse = await GetRecordsWithFilterAsync(ConfigurationManager.AppSettings["TestStudent"], Uri.EscapeDataString(studentFilter));
+
+            var deserializedResponse = DeserializeResponse<TestStudent>(studentResponse).FirstOrDefault();
+            return deserializedResponse;
+        }
+        catch (Exception ex)
+        {
+            // Обработка исключения
+            Console.WriteLine($"Ошибка: {ex.Message}");
+            return null;
+        }
+
+    }
+
+
     // Основной метод для получения списка тестов
     internal async Task<List<TestStudent>> GetTestsByStudentIdAndSubjectIdAsync(int studentId, int subjectId)
     {
@@ -189,36 +211,92 @@ internal class ClassBaserowApiClient
     // Метод для обновления записи
     internal async Task<bool> UpdateRecordAsync(string tableId, object updateObject, int idObject)
     {
-        // Создаем контент запроса, сериализуя объект updateObject в формат JSON.
-        var content = new StringContent(JsonConvert.SerializeObject(updateObject), System.Text.Encoding.UTF8, "application/json");
-
-        // Создаем HTTP-запрос методом PATCH для обновления данных в определенной строке таблицы.
-        var request = new HttpRequestMessage(new HttpMethod("PATCH"), $"database/rows/table/{tableId}/{idObject}/?user_field_names=true")
+        try
         {
-            Content = content // Устанавливаем контент запроса.
-        };
+            // Преобразуем updateObject в JObject для изменения структуры
+            var jsonObject = JObject.FromObject(updateObject);
 
-        // Отправляем асинхронный запрос на сервер с созданным запросом.
-        var response = await _httpClient.SendAsync(request);
+            // Преобразование полей
+            if (!TryTransformFields(jsonObject, out string errorMessage))
+            {
+                Console.WriteLine(errorMessage);
+                return false;
+            }
 
-        // Возвращаем true, если запрос завершился успешно (статус код 2xx), иначе возвращаем false.
-        return response.IsSuccessStatusCode;
+            // Сериализация объекта в JSON
+            var jsonString = JsonConvert.SerializeObject(jsonObject);
+            var content = new StringContent(jsonString, System.Text.Encoding.UTF8, "application/json");
+
+            // Формирование URL
+            var requestUrl = $"database/rows/table/{tableId}/{idObject}/?user_field_names=true";
+
+            // Создание запроса
+            var request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUrl)
+            {
+                Content = content
+            };
+
+            // Отправка запроса
+            var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                // Логирование ошибки
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Ошибка: {response.StatusCode}, Содержание: {responseContent}");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Логирование исключения
+            Console.WriteLine($"Исключение: {ex.Message}");
+            return false;
+        }
+    }
+
+    private bool TryTransformFields(JObject jsonObject, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        if (jsonObject["student"] is JArray studentArray && studentArray.Count > 0)
+        {
+            jsonObject["student"] = studentArray[0]["value"].ToString();
+        }
+        else
+        {
+            errorMessage = "Поле 'student' должно содержать допустимое значение.";
+            return false;
+        }
+
+        if (jsonObject["test"] is JArray testArray && testArray.Count > 0)
+        {
+            jsonObject["test"] = testArray[0]["value"].ToString();
+        }
+        else
+        {
+            errorMessage = "Поле 'test' должно содержать допустимое значение.";
+            return false;
+        }
+
+        return true;
     }
 
     //пример
-    internal async Task<bool> UpdateStudentByEmailAsync(string tableId, string email, Student updatedRecord)
+    internal async Task<bool> UpdateStudentByIDAsync(string IdStudent, string idTest, double updatedRecord)
     {
         // Находим запись по email
-        var existingRecord = await GetStudentByEmailAsync(email);
-        if (existingRecord == null) return false; // Запись с таким email не найдена
+        var deserializedResponse = await GetTestStudentByIDAsync(IdStudent, idTest);
+        if (deserializedResponse == null) return false;
 
         // Обновляем данные в найденной записи
-        existingRecord.Name = updatedRecord.Name;
-        existingRecord.Surname = updatedRecord.Surname;
+        deserializedResponse.Ball = updatedRecord;
+        deserializedResponse.Check = true;
 
-        if (await UpdateRecordAsync(tableId, existingRecord, existingRecord.Id))
-            return true;
-        else
-            return false;
+        return await UpdateRecordAsync(ConfigurationManager.AppSettings["TestStudent"], deserializedResponse, deserializedResponse.Id);
     }
 }
