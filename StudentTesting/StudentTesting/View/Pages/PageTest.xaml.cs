@@ -104,31 +104,32 @@ namespace StudentTesting.View.Pages
             SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         }
 
-        private async void MainWindow_WindowClosing(object sender, CancelEventArgs e)
+        private void MainWindow_WindowClosing(object sender, CancelEventArgs e)
         {
-            lvButton.SelectedItem = lvButton.Items[0];
-            var nullValue = _questions.Count(q => q.Answer.Count == 0);
-            var message = nullValue > 0
-                ? $"Ваш текущий результат будет сохранен\nОстались вопросы без ответа (количество: {nullValue})"
-                : "Ваш текущий результат будет сохранен\nЗавершение тестирования";
+            //lvButton.SelectedItem = lvButton.Items[0];
+            //var nullValue = _questions.Count(q => q.Answer.Count == 0);
+            //var message = nullValue > 0
+            //    ? $"Ваш текущий результат будет сохранен\nОстались вопросы без ответа (количество: {nullValue})"
+            //    : "Ваш текущий результат будет сохранен\nЗавершение тестирования";
 
-            var result = MessageBox.Show(message, "Вы уверены, что хотите закрыть приложение?", MessageBoxButton.YesNo);
+            //var result = MessageBox.Show(message, "Вы уверены, что хотите закрыть приложение?", MessageBoxButton.YesNo);
 
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    await SaveAndExitAsync(GetResultTest());
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            else
-            {
-                e.Cancel = true;
-            }
+            //if (result == MessageBoxResult.Yes)
+            //{
+            //    try
+            //    {
+            //        await SaveAndExitAsync(GetResultTest());
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            //    }
+            //}
+            //else
+            //{
+            //    e.Cancel = true;
+            //}
+            e.Cancel = true;
         }
 
         private async Task SaveAndExitAsync(double resultTest)
@@ -157,7 +158,6 @@ namespace StudentTesting.View.Pages
             }
             else
             {
-                _timer.Stop();
                 Application.Current.Dispatcher.Invoke(() => NavigateToResultsPage());
             }
         }
@@ -371,6 +371,7 @@ namespace StudentTesting.View.Pages
             await SaveAndExitAsync(resultTest);
             Application.Current.Dispatcher.Invoke(() =>
             {
+                _timer.Stop();
                 NavigationService.Navigate(new PageResult(resultTest, _fullName, _nameTest, _idStudent));
             });
         }

@@ -18,24 +18,24 @@
             <MenuItem Header="Выйти из программы" Click="MenuItem_ClickGoExit"/>
         </ContextMenu>
     </Page.Resources>
-    <Grid Background="#aa7eb4">
+    <Grid Background="#d1c2f0">
         <TextBlock x:Name="txtBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="15"/>
         <Button x:Name="btnExit" FontSize="20" Foreground="Black" Content="Выход" Click="btnExit_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,13,13,0" Style="{StaticResource MaterialDesignOutlinedButton}" Cursor="">
             <Button.ContextMenu>
                 <StaticResource ResourceKey="ExitContextMenu"/>
             </Button.ContextMenu>
         </Button>
-        <Border MinWidth="400" CornerRadius="60" Background="#bc96c4 "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,60,10,10" Padding="20">
+        <Border MinWidth="400" CornerRadius="60" Background=" #c0c6ff "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,60,10,10" Padding="20">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+                <DropShadowEffect BlurRadius="30" Color="#c0c6ff " ShadowDepth="0"/>
             </Border.Effect>
-            <Border MinWidth="400" CornerRadius="50" Background="#cdb0d4"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Padding="30">
+            <Border MinWidth="400" CornerRadius="50" Background=" #cfd4ff "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Padding="30">
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+                    <DropShadowEffect BlurRadius="30" Color=" #cfd4ff" ShadowDepth="0"/>
                 </Border.Effect>
-                <Border MinWidth="400" CornerRadius="30" Background="#ddc7e2 "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Padding="30">
+                <Border MinWidth="400" CornerRadius="30" Background="#FFE1E4FF"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Padding="30">
                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
+                        <DropShadowEffect BlurRadius="30" Color="#FFE1E4FF" ShadowDepth="0"/>
                     </Border.Effect>
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"> 
                     <TextBlock x:Name="txtBlockTest"  FontSize="35" Padding="15"/>

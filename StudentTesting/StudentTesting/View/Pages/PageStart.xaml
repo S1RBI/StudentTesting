@@ -22,7 +22,7 @@
                             </GeometryDrawing.Geometry>
                             <GeometryDrawing.Brush>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1" x:Name="animatedBrush">
-                                    <GradientStop Color="#bd86f0" Offset="0.0" x:Name="gradStop1"/>
+                                    <GradientStop Color="#FFE1E4FF" Offset="0.0" x:Name="gradStop1"/>
                                     <GradientStop Color="#d4b0f5" Offset="1.0" x:Name="gradStop2"/>
                                 </LinearGradientBrush>
                             </GeometryDrawing.Brush>
@@ -65,8 +65,8 @@
             <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                 <BeginStoryboard>
                     <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                        <ColorAnimation Storyboard.TargetName="gradStop1" Storyboard.TargetProperty="Color" To="#FFBB86FC" Duration="0:0:5"/>
-                        <ColorAnimation Storyboard.TargetName="gradStop2" Storyboard.TargetProperty="Color" To="#FF6200EE" Duration="0:0:5"/>
+                        <ColorAnimation Storyboard.TargetName="gradStop1" Storyboard.TargetProperty="Color" To="#d4b0f5" Duration="0:0:5"/>
+                        <ColorAnimation Storyboard.TargetName="gradStop2" Storyboard.TargetProperty="Color" To="#FFE1E4FF" Duration="0:0:5"/>
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
