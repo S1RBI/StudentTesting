@@ -1,6 +1,8 @@
-﻿using StudentTesting.View.Pages;
+﻿using Microsoft.Win32;
+using StudentTesting.View.Pages;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,11 +23,18 @@ namespace StudentTesting
     /// </summary>
     public partial class MainWindow : Window
     {
+        public event EventHandler<CancelEventArgs> WindowClosing;
         public MainWindow()
         {
             InitializeComponent();
             mainFrame.Content = new PageMain(1, "Михейкин Юрий Андреевич");
             //mainFrame.Content = new PageStart();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            WindowClosing?.Invoke(this, e);
+        }
+
     }
 }

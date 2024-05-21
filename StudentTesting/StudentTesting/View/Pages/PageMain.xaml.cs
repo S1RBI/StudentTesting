@@ -111,7 +111,6 @@ namespace StudentTesting.View.Pages
                     }
                 }
             }
-            await Task.Delay(500);
             lvSubject.IsEnabled = true;
         }
         private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
@@ -159,7 +158,7 @@ namespace StudentTesting.View.Pages
 
                 var message = $"Время на выполнение: {selectedItemTest.Period} мин.\nКоличество вопросов: {selectedItemTest.Quantity}";
 
-                var result = MessageBox.Show(message, $"Вы уверены, что хотите начать {selectedItemTest.NameTest}?", MessageBoxButton.YesNo);
+                var result = MessageBox.Show(message, $"Вы уверены, что хотите начать тест «{selectedItemTest.NameTest}»?", MessageBoxButton.YesNo);
                 
                 if (result == MessageBoxResult.Yes)
                 {

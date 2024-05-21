@@ -88,7 +88,7 @@ namespace StudentTesting.View.Pages
                 }
                 else if (ball >= 25f)
                 {
-                    return Brushes.Orange;
+                    return Brushes.OrangeRed;
                 }
                 else
                 {

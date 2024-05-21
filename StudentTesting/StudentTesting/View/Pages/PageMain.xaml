@@ -28,20 +28,23 @@
                 <StaticResource ResourceKey="ExitContextMenu"/>
             </Button.ContextMenu>
         </Button>
-        <Border MinWidth="400"  Background="White"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,60,0,0" Padding="30">
+        <Border MinWidth="400"  Background="#f2e9f4"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,60,0,0" Padding="30">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="30" Color="LightGray" ShadowDepth="0"/>
             </Border.Effect>
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" >
+            <Border  Padding="30" CornerRadius="30" Background=" #f9f5fa "  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="30" Color=" #ede0f0 " ShadowDepth="0"/>
+                </Border.Effect>
                 <ListView x:Name="lvSubject" SelectionMode="Single" SelectionChanged="lvSubject_SelectionChanged" FontSize="30" Style="{StaticResource MaterialDesignListView}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Vertical">
+                            <StackPanel Margin="10,0,0,0" Orientation="Vertical">
                                 <TextBlock Text="{Binding Value}"></TextBlock>
-                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged" FontSize="20" MaxWidth="700" Padding="5" Style="{StaticResource MaterialDesignChoiceChipAccentListBox}">
+                                <ListView x:Name="lvSubItems" Visibility="Collapsed" SelectionChanged="SubItemsListView_SelectionChanged" FontSize="20" Padding="5">
                                     <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignChoiceChipAccentListBoxItem}">
-                                            <Setter Property="IsEnabled">
+                                            <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignChoiceChipPrimaryListBoxItem}">
+                                                <Setter Property="IsEnabled">
                                                 <Setter.Value>
                                                     <MultiBinding Converter="{StaticResource TestEnabledMultiConverter}">
                                                         <Binding Path="Check"/>
@@ -59,8 +62,8 @@
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Text" Value="{Binding DateTime, Converter={StaticResource TestDateTimeStatusConverter}}"/>
-                                                            <Setter Property="Foreground" Value="Green"/>
-                                                            <Style.Triggers>
+                                                                <Setter Property="Foreground" Value="Green"/>
+                                                                <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding DateTime, Converter={StaticResource DateTimeHasPassedConverter}}" Value="True">
                                                                     <Setter Property="Foreground" Value="Red"/>
                                                                     <Setter Property="Text" Value="Тест закрыт"/>
@@ -77,11 +80,12 @@
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
+
                             </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-            </StackPanel>
+            </Border>
         </Border>
     </Grid>
 </Page>

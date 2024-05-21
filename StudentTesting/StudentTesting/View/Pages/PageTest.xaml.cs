@@ -1,44 +1,30 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace StudentTesting.View.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для PageTest.xaml
-    /// </summary>
     public partial class PageTest : Page
     {
         private int _index = -1;
         private int _idStudent;
         private int _idTest;
-
         private string _fullName;
         private string _nameTest;
-
         private List<Question> _questions;
         private Timer _timer;
         private TimeSpan _timeRemaining;
-
         private bool _isPulsing = false;
-
-        ListBoxItem _selectedItem;
-
+        private ListBoxItem _selectedItem;
         private readonly ClassBaserowApiClient _baserowApiClient;
 
         internal PageTest(int idStudent, string fullName, int idTest, int count, int time, string nameTest, List<Question> questions)
@@ -46,32 +32,113 @@ namespace StudentTesting.View.Pages
             _nameTest = nameTest;
             _idStudent = idStudent;
             _idTest = idTest;
-            _fullName = fullName; 
+            _fullName = fullName;
             _questions = questions;
             _timeRemaining = TimeSpan.FromMinutes(time);
-            List<string> items = new List<string>();
-            for (int i = 1; i <= count; i++) items.Add(i.ToString());
             _baserowApiClient = new ClassBaserowApiClient();
 
             InitializeComponent();
+            Loaded += PageTest_Loaded;
+            this.Unloaded += OnPageUnloaded;
 
-            Task.Run(() => StartTimer());
-            txtBlockStudentFullName.Text = fullName;
-            txtBlockTestName.Text = nameTest;
+            // Подписываемся на системные события
+            SystemEvents.SessionEnding += OnSessionEnding;
+            SystemEvents.PowerModeChanged += OnPowerModeChanged;
+
+            if (App.Current.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.WindowClosing += MainWindow_WindowClosing;
+            }
+
+            InitializeTestUI(count);
+            StartTimer();
+        }
+
+        private void InitializeTestUI(int count)
+        {
+            var items = Enumerable.Range(1, count).Select(i => i.ToString()).ToList();
+            txtBlockStudentFullName.Text = _fullName;
+            txtBlockTestName.Text = _nameTest;
             lvButton.ItemsSource = items;
-
             lvButton.Loaded += LvButton_Loaded;
         }
+
         private void LvButton_Loaded(object sender, RoutedEventArgs e)
         {
-            // Программное выделение первого элемента после загрузки ListView
             lvButton.SelectedItem = lvButton.Items[0];
         }
 
+        private async void PageTest_Loaded(object sender, RoutedEventArgs e)
+        {
+            await LoadDataAsync();
+        }
+
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                await _baserowApiClient.UpdateStudentByIDAsync(_idStudent.ToString(), _idTest.ToString(), 0f);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка: {ex}");
+            }
+        }
+
+        private async void OnSessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            await SaveAndExitAsync(GetResultTest());
+        }
+
+        private async void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            if (e.Mode == PowerModes.Suspend)
+            {
+                await SaveAndExitAsync(GetResultTest());
+            }
+        }
+
+        private void OnPageUnloaded(object sender, RoutedEventArgs e)
+        {
+            SystemEvents.SessionEnding -= OnSessionEnding;
+            SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+        }
+
+        private async void MainWindow_WindowClosing(object sender, CancelEventArgs e)
+        {
+            lvButton.SelectedItem = lvButton.Items[0];
+            var nullValue = _questions.Count(q => q.Answer.Count == 0);
+            var message = nullValue > 0
+                ? $"Ваш текущий результат будет сохранен\nОстались вопросы без ответа (количество: {nullValue})"
+                : "Ваш текущий результат будет сохранен\nЗавершение тестирования";
+
+            var result = MessageBox.Show(message, "Вы уверены, что хотите закрыть приложение?", MessageBoxButton.YesNo);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    await SaveAndExitAsync(GetResultTest());
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private async Task SaveAndExitAsync(double resultTest)
+        {
+            await _baserowApiClient.UpdateStudentByIDAsync(_idStudent.ToString(), _idTest.ToString(), resultTest);
+        }
 
         private void StartTimer()
         {
-            _timer = new Timer(1000); // Устанавливаем интервал в 1 секунду
+            _timer = new Timer(1000);
             _timer.Elapsed += Timer_Tick;
             _timer.AutoReset = true;
             _timer.Start();
@@ -83,7 +150,6 @@ namespace StudentTesting.View.Pages
             {
                 _timeRemaining = _timeRemaining.Add(TimeSpan.FromSeconds(-1));
                 UpdateTimerText();
-
                 if (_timeRemaining.TotalSeconds <= 60)
                 {
                     UpdateTimerAppearance();
@@ -92,21 +158,18 @@ namespace StudentTesting.View.Pages
             else
             {
                 _timer.Stop();
-                NavigateToResultsPage();
+                Application.Current.Dispatcher.Invoke(() => NavigateToResultsPage());
             }
         }
+
         private void UpdateTimerText()
         {
-            try
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    txtBlockTime.Text = $"{_timeRemaining.Minutes:D2}:{_timeRemaining.Seconds:D2}";
-                });
-            }
-            catch { }
-            
+                txtBlockTime.Text = $"{_timeRemaining.Minutes:D2}:{_timeRemaining.Seconds:D2}";
+            });
         }
+
         private void UpdateTimerAppearance()
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -151,76 +214,43 @@ namespace StudentTesting.View.Pages
             {
                 List<string> selectedAnswers = GetSelectedAnswers();
                 _questions[_index].Answer = selectedAnswers;
-                if(selectedAnswers.Count != 0) MarkPreviousButtonAsAnswered(_selectedItem);
+                if (selectedAnswers.Count != 0)
+                {
+                    MarkPreviousButtonAsAnswered(_selectedItem);
+                }
             }
         }
 
         private List<string> GetSelectedAnswers()
         {
-            List<string> selectedAnswers = new List<string>();
-
-            switch (_questions[_index].Type)
+            return _questions[_index].Type switch
             {
-                case "SingleChoice":
-                    selectedAnswers = GetSelectedSingleChoiceItems();
-                    break;
-                case "MultipleChoice":
-                    selectedAnswers = GetSelectedMultipleChoiceItems();
-                    break;
-                case "TextAnswer":
-                    selectedAnswers = GetTextAnswer();
-                    break;
-            }
-
-            return selectedAnswers;
+                "SingleChoice" => GetSelectedSingleChoiceItems(),
+                "MultipleChoice" => GetSelectedMultipleChoiceItems(),
+                "TextAnswer" => GetTextAnswer(),
+                _ => new List<string>()
+            };
         }
 
         private List<string> GetSelectedSingleChoiceItems()
         {
-            List<string> selectedChoices = new List<string>();
-
-            foreach (var item in lvChoices.Items)
-            {
-                ListViewItem listViewItem = (ListViewItem)lvChoices.ItemContainerGenerator.ContainerFromItem(item);
-                RadioButton radioButton = FindVisualChild<RadioButton>(listViewItem);
-
-                if (radioButton != null && radioButton.IsChecked == true)
-                {
-                    selectedChoices.Add(item.ToString());
-                }
-            }
-
-            return selectedChoices;
+            return lvChoices.Items.Cast<object>()
+                .Where(item => FindVisualChild<RadioButton>(lvChoices.ItemContainerGenerator.ContainerFromItem(item))?.IsChecked == true)
+                .Select(item => item.ToString())
+                .ToList();
         }
 
         private List<string> GetSelectedMultipleChoiceItems()
         {
-            List<string> selectedChoices = new List<string>();
-
-            foreach (var item in lvMultipleChoice.Items)
-            {
-                ListViewItem listViewItem = (ListViewItem)lvMultipleChoice.ItemContainerGenerator.ContainerFromItem(item);
-                CheckBox checkBox = FindVisualChild<CheckBox>(listViewItem);
-
-                if (checkBox != null && checkBox.IsChecked == true)
-                {
-                    selectedChoices.Add(item.ToString());
-                }
-            }
-
-            return selectedChoices;
+            return lvMultipleChoice.Items.Cast<object>()
+                .Where(item => FindVisualChild<CheckBox>(lvMultipleChoice.ItemContainerGenerator.ContainerFromItem(item))?.IsChecked == true)
+                .Select(item => item.ToString())
+                .ToList();
         }
 
         private List<string> GetTextAnswer()
         {
-            List<string> textAnswer = new List<string>();
-
-            if (!string.IsNullOrWhiteSpace(txtBoxChoice.Text))
-            {
-                textAnswer.Add(txtBoxChoice.Text);
-            }
-
-            return textAnswer;
+            return !string.IsNullOrWhiteSpace(txtBoxChoice.Text) ? new List<string> { txtBoxChoice.Text } : new List<string>();
         }
 
         private void UpdateUI(int selectedIndex)
@@ -230,54 +260,41 @@ namespace StudentTesting.View.Pages
             switch (_questions[selectedIndex].Type)
             {
                 case "SingleChoice":
-                    spMultipleChoice.Visibility = Visibility.Collapsed;
-                    spTextAnswer.Visibility = Visibility.Collapsed;
-                    lvChoices.ItemsSource = null;
+                    UpdateVisibility(spSingleChoice);
                     lvChoices.ItemsSource = _questions[selectedIndex].Choices;
                     lvChoices.UpdateLayout();
-                    foreach (var item in lvChoices.Items)
-                    {
-                        string choice = item.ToString();
-
-                        ListViewItem listViewItem = lvChoices.ItemContainerGenerator.ContainerFromItem(item) as ListViewItem;
-
-                        if (listViewItem != null)
-                        {
-                            listViewItem.IsSelected = _questions[selectedIndex].Answer.Contains(choice);
-                        }
-                    }
-                    spSingleChoice.Visibility = Visibility.Visible;
+                    SelectPreviousAnswers(lvChoices, _questions[selectedIndex].Answer);
                     break;
                 case "MultipleChoice":
-                    spSingleChoice.Visibility = Visibility.Collapsed;
-                    spTextAnswer.Visibility = Visibility.Collapsed;
-                    lvMultipleChoice.ItemsSource = null;
+                    UpdateVisibility(spMultipleChoice);
                     lvMultipleChoice.ItemsSource = _questions[selectedIndex].Choices;
                     lvMultipleChoice.UpdateLayout();
-                    foreach (var item in lvMultipleChoice.Items)
-                    {
-                        string choice = item.ToString();
-
-                        ListViewItem listViewItem = lvMultipleChoice.ItemContainerGenerator.ContainerFromItem(item) as ListViewItem;
-
-                        if (listViewItem != null)
-                        {
-                            listViewItem.IsSelected = _questions[selectedIndex].Answer.Contains(choice);
-                        }
-                    }
-                    spMultipleChoice.Visibility = Visibility.Visible;
+                    SelectPreviousAnswers(lvMultipleChoice, _questions[selectedIndex].Answer);
                     break;
                 case "TextAnswer":
-                    txtBoxChoice.Clear();
-                    if(_questions[selectedIndex].Answer.Count != 0) txtBoxChoice.Text = _questions[selectedIndex].Answer[0];
-                    spSingleChoice.Visibility = Visibility.Collapsed;
-                    spMultipleChoice.Visibility = Visibility.Collapsed;
-                    spTextAnswer.Visibility = Visibility.Visible;
+                    UpdateVisibility(spTextAnswer);
+                    txtBoxChoice.Text = _questions[selectedIndex].Answer.FirstOrDefault() ?? string.Empty;
                     break;
             }
 
             _index = selectedIndex;
             _selectedItem = (ListBoxItem)lvButton.ItemContainerGenerator.ContainerFromIndex(selectedIndex);
+        }
+
+        private void UpdateVisibility(StackPanel visiblePanel)
+        {
+            spSingleChoice.Visibility = spSingleChoice == visiblePanel ? Visibility.Visible : Visibility.Collapsed;
+            spMultipleChoice.Visibility = spMultipleChoice == visiblePanel ? Visibility.Visible : Visibility.Collapsed;
+            spTextAnswer.Visibility = spTextAnswer == visiblePanel ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SelectPreviousAnswers(ListView listView, List<string> previousAnswers)
+        {
+            foreach (var item in listView.Items)
+            {
+                ListViewItem listViewItem = listView.ItemContainerGenerator.ContainerFromItem(item) as ListViewItem;
+                listViewItem.IsSelected = previousAnswers.Contains(item.ToString());
+            }
         }
 
         private void MarkPreviousButtonAsAnswered(ListBoxItem previousItem)
@@ -291,20 +308,16 @@ namespace StudentTesting.View.Pages
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
             {
                 DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child is T)
-                    return (T)child;
-                else
-                {
-                    T childOfChild = FindVisualChild<T>(child);
-                    if (childOfChild != null)
-                        return childOfChild;
-                }
+                if (child is T tChild) return tChild;
+                T childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null) return childOfChild;
             }
             return null;
         }
 
         private double GetResultTest()
         {
+            lvButton.SelectedItem = lvButton.Items[0];
             double totalScore = 0;
 
             foreach (var question in _questions)
@@ -340,46 +353,26 @@ namespace StudentTesting.View.Pages
         private async void btEnd_Click(object sender, RoutedEventArgs e)
         {
             lvButton.SelectedItem = lvButton.Items[0];
-            int nullValue = 0;
-            string message;
-            foreach (var question in _questions)
-            {
-                if (question.Answer.Count == 0) nullValue++;
-            }
-            if(nullValue > 0)
-            {
-                message = $"Остались вопросы без ответа (количество: {nullValue})";
-                
-            }
-            else
-            {
-                message = $"Завершение тестирования";
-            }
-            var result = MessageBox.Show(message, $"Вы уверены, что хотите закончить тест?", MessageBoxButton.YesNo);
+            var nullValue = _questions.Count(q => q.Answer.Count == 0);
+            var message = nullValue > 0
+                ? $"Остались вопросы без ответа (количество: {nullValue})"
+                : "Завершение тестирования";
+
+            var result = MessageBox.Show(message, "Вы уверены, что хотите закончить тест?", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
-                double resultTest = GetResultTest();
-                await _baserowApiClient.UpdateStudentByIDAsync(_idStudent.ToString(), _idTest.ToString(), resultTest);
-                NavigationService.Navigate(new PageResult(resultTest, _fullName, _nameTest, _idStudent));
+                await NavigateToResultsPage();
             }
         }
 
-        private async void NavigateToResultsPage()
+        private async Task NavigateToResultsPage()
         {
-            // Переход на другую страницу в UI-потоке
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                lvButton.SelectedItem = lvButton.Items[0];
-            });
             double resultTest = GetResultTest();
-            // Асинхронный вызов вне лямбда-выражения
-            await _baserowApiClient.UpdateStudentByIDAsync(_idStudent.ToString(), _idTest.ToString(), resultTest);
-
-            // Переход на другую страницу в UI-потоке
+            await SaveAndExitAsync(resultTest);
             Application.Current.Dispatcher.Invoke(() =>
             {
                 NavigationService.Navigate(new PageResult(resultTest, _fullName, _nameTest, _idStudent));
             });
         }
-    }   
+    }
 }
