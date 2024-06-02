@@ -129,7 +129,7 @@ namespace StudentTesting.View.Pages
             //{
             //    e.Cancel = true;
             //}
-            e.Cancel = true;
+            // e.Cancel = true;
         }
 
         private async Task SaveAndExitAsync(double resultTest)

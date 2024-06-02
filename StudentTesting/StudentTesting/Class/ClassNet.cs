@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -104,12 +103,11 @@ internal class ClassNet
         try
         {
             smtpClient.Send(msg);
-            return true; //Email sent successfully
+            return true;
         }
         catch
         {
-            // Log the exception or handle it appropriately
-            return false; //Error sending email: {ex.Message}
+            return false;
         }
     }
 }
